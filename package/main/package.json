@@ -1,0 +1,11 @@
+{
+  "name": "@pallad/entrysmith",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "yarn run -TB vitest run --passWithNoTests",
+    "lint": "yarn run -TB eslint src/**/*.ts",
+    "generate-barrels": "yarn run -TB barrelsby -l replace -L --delete -d ./src"
+  },
+  "packageManager": "yarn@4.11.0"
+}

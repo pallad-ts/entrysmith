@@ -1,0 +1,20 @@
+{
+  "name": "@pallad/entrysmith-monorepo",
+  "version": "1.0.0",
+  "packageManager": "yarn@4.11.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pallad-ts/entrysmith.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pallad-ts/entrysmith/issues"
+  },
+  "homepage": "https://github.com/pallad-ts/entrysmith#readme",
+  "description": "",
+  "devDependencies": {
+    "@pallad/plop-templates": "^1.4.0",
+    "plop": "^4.0.5"
+  }
+}
