@@ -3,7 +3,7 @@
     "declaration": true,
     "importHelpers": true,
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "strict": true,
     "target": "es2024",

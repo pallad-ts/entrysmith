@@ -1,6 +1,6 @@
 import { Entrypoint } from "../Entrypoint";
 
-describe("Entrypoint.fromString", () => {
+describe("Entrypoint", () => {
 	it("parses root index entrypoint", () => {
 		const entrypoint = Entrypoint.fromString("index.ts");
 

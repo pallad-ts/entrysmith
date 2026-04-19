@@ -22,9 +22,9 @@ export class Dependency {
 		/**
 		 * Absolute path to dependency package directory.
 		 *
-		 * @example `/workspace/package/main`
+		 * @example `package/main`
 		 */
-		readonly absolutePath: string,
+		readonly path: string,
 		readonly entrypointList: Entrypoint[],
 		readonly config: DependencyConfig
 	) {
@@ -32,7 +32,7 @@ export class Dependency {
 			throw new Error("Dependency name cannot be empty.");
 		}
 
-		if (absolutePath.length === 0) {
+		if (path.length === 0) {
 			throw new Error("Dependency absolutePath cannot be empty.");
 		}
 	}
