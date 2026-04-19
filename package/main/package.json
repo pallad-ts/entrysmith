@@ -26,6 +26,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/npmcli__package-json": "^4.0.4",
     "typescript": "^5.8.3"
   },
   "packageManager": "yarn@4.11.0"

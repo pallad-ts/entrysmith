@@ -1,1 +1,0 @@
-{"version":3,"file":"Entrypoint.d.ts","sourceRoot":"","sources":["../../src/model/Entrypoint.ts"],"names":[],"mappings":"AAOA,qBAAa,UAAU;IACV,QAAQ,CAAC,IAAI,EAAE,MAAM,GAAG,SAAS;IAAE,QAAQ,CAAC,IAAI,EAAE,MAAM;gBAA/C,IAAI,EAAE,MAAM,GAAG,SAAS,EAAW,IAAI,EAAE,MAAM;IAUpE,MAAM,CAAC,UAAU,CAAC,KAAK,EAAE,MAAM,GAAG,UAAU;CA+C5C"}

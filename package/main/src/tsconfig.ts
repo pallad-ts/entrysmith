@@ -4,7 +4,7 @@ import path from "node:path";
 import { just, none, type Maybe } from "@sweet-monads/maybe";
 import { parse, type ParseError } from "jsonc-parser";
 
-import type { Dependency } from "./model/dependency";
+import type { Dependency } from "./model/Dependency";
 
 type TsConfigReference = {
 	path: string;

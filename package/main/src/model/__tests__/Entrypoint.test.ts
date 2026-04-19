@@ -4,7 +4,7 @@ describe("Entrypoint.fromString", () => {
 	it("parses root index entrypoint", () => {
 		const entrypoint = Entrypoint.fromString("index.ts");
 
-		expect(entrypoint).toMatchInlineSnapshot(`
+		expect(entrypoint.unwrap()).toMatchInlineSnapshot(`
 			Entrypoint {
 			  "name": undefined,
 			  "path": "src/index.ts",
@@ -15,7 +15,7 @@ describe("Entrypoint.fromString", () => {
 	it("parses nested index entrypoint", () => {
 		const entrypoint = Entrypoint.fromString("main/index.ts");
 
-		expect(entrypoint).toMatchInlineSnapshot(`
+		expect(entrypoint.unwrap()).toMatchInlineSnapshot(`
 			Entrypoint {
 			  "name": "main",
 			  "path": "src/main/index.ts",
@@ -26,7 +26,7 @@ describe("Entrypoint.fromString", () => {
 	it("parses nested file entrypoint", () => {
 		const entrypoint = Entrypoint.fromString("main/another.ts");
 
-		expect(entrypoint).toMatchInlineSnapshot(`
+		expect(entrypoint.unwrap()).toMatchInlineSnapshot(`
 			Entrypoint {
 			  "name": "main/another",
 			  "path": "src/main/another.ts",
@@ -37,7 +37,7 @@ describe("Entrypoint.fromString", () => {
 	it("normalizes slashes and leading dot segment", () => {
 		const entrypoint = Entrypoint.fromString(".\\main\\index.ts");
 
-		expect(entrypoint).toMatchInlineSnapshot(`
+		expect(entrypoint.unwrap()).toMatchInlineSnapshot(`
 			Entrypoint {
 			  "name": "main",
 			  "path": "src/main/index.ts",
@@ -46,9 +46,14 @@ describe("Entrypoint.fromString", () => {
 	});
 
 	it("rejects parent directory traversal", () => {
-		expect(() => Entrypoint.fromString("main/../another.ts"))
-			.toThrowErrorMatchingInlineSnapshot(
+		const entrypoint = Entrypoint.fromString("main/../another.ts");
+
+		expect(entrypoint.isLeft()).toBe(true);
+
+		if (entrypoint.isLeft()) {
+			expect(entrypoint.value).toMatchInlineSnapshot(
 				`[Error: Entrypoint path cannot contain upper-directory segments: "main/../another.ts".]`,
 			);
+		}
 	});
 });

@@ -1,11 +1,10 @@
 import { getPackages } from "@manypkg/get-packages";
 import { NotFoundError } from "@pallad/common-errors";
-import type { Either } from "@sweet-monads/either";
-import path from "node:path";
+import * as path from "node:path";
 
 import { loadConfig } from "../config";
 import { resolveEntrypoints } from "../entrypoints";
-import { Dependency } from "../model/dependency";
+import { Dependency } from "../model/Dependency";
 import {
 	applyEntrypointsToPackageJson,
 	getPackageDependencies,
@@ -22,7 +21,12 @@ export type FixResult = {
 };
 
 export async function runFix(projectDirectory: string): Promise<FixResult> {
-	const config = getRightValueOrThrow(await loadConfig(projectDirectory));
+	const configResult = await loadConfig(projectDirectory);
+	if (configResult.isLeft()) {
+		throw configResult.value;
+	}
+
+	const config = configResult.value;
 
 	const entrypoints = resolveEntrypoints(config.entrypoints);
 	const packageJson = await loadPackageJson(projectDirectory);
@@ -86,9 +90,10 @@ async function resolveWorkspaceDependencies(projectDirectory: string, packageJso
 			continue;
 		}
 
-		const dependencyConfigResult = await loadConfig(workspaceDependency.absolutePath);
-		if (dependencyConfigResult.isLeft()) {
-			const dependencyError = getLeftValueOrThrow(dependencyConfigResult);
+		const dependencyPath = path.relative(projectDirectory, workspaceDependency.absolutePath);
+		const dependencyResult = await Dependency.load(projectDirectory, dependencyPath);
+		if (dependencyResult.isLeft()) {
+			const dependencyError = dependencyResult.value;
 
 			if (dependencyError instanceof NotFoundError) {
 				continue;
@@ -97,35 +102,8 @@ async function resolveWorkspaceDependencies(projectDirectory: string, packageJso
 			throw dependencyError;
 		}
 
-		const dependencyConfig = getRightValueOrThrow(dependencyConfigResult);
-		const dependencyEntrypoints = resolveEntrypoints(dependencyConfig.entrypoints);
-
-		resolvedDependencies.push(
-			Dependency.create({
-				name: dependencyName,
-				absolutePath: workspaceDependency.absolutePath,
-				entrypointList: dependencyEntrypoints,
-			})
-		);
+		resolvedDependencies.push(dependencyResult.value);
 	}
 
 	return resolvedDependencies;
-}
-
-function getLeftValueOrThrow<L, R>(value: Either<L, R>): L {
-	return value.fold(
-		error => error,
-		() => {
-			throw new Error("Unexpected right Either state.");
-		}
-	);
-}
-
-function getRightValueOrThrow<L extends Error, R>(value: Either<L, R>): R {
-	return value.fold(
-		error => {
-			throw error;
-		},
-		result => result
-	);
 }

@@ -497,6 +497,7 @@ __metadata:
     "@pallad/common-errors": "npm:^2.2.0"
     "@sweet-monads/either": "npm:^3.3.1"
     "@sweet-monads/maybe": "npm:^3.3.1"
+    "@types/npmcli__package-json": "npm:^4.0.4"
     cosmiconfig: "npm:^9.0.0"
     cosmiconfig-typescript-loader: "npm:^6.1.0"
     jsonc-parser: "npm:^3.3.1"
@@ -809,6 +810,13 @@ __metadata:
   dependencies:
     undici-types: "npm:~7.16.0"
   checksum: 10/99b9f15e67a4b3c39b39ad83ee0febad7f0b4709c004863104d7acfa4146dd7e58c12a08a9a7ff2be8c2eefd0063bf991fade0879d7c4a370a0ee7fd4c799e8a
+  languageName: node
+  linkType: hard
+
+"@types/npmcli__package-json@npm:^4.0.4":
+  version: 4.0.4
+  resolution: "@types/npmcli__package-json@npm:4.0.4"
+  checksum: 10/ad47224a87dcee6710b5a19fdd283b1e02537e4b4e8d14535d5f18486724eeab4f5ce1e65dc348eb65924e7e5beff343d3a64db0370220aa9dfb1ce158bfbb74
   languageName: node
   linkType: hard
 

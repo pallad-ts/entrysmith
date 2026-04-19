@@ -1,3 +1,5 @@
+import { fromTry, type Either } from "@sweet-monads/either";
+
 import * as path from "node:path";
 
 import { normalizePath } from "../util/normalizePath";
@@ -19,45 +21,47 @@ export class Entrypoint {
 		}
 	}
 
-	static fromString(input: string): Entrypoint {
-		const trimmedInput = input.trim();
+	static fromString(input: string): Either<Error, Entrypoint> {
+		return fromTry(() => {
+			const trimmedInput = input.trim();
 
-		if (trimmedInput.length === 0) {
-			throw new Error("Entrypoint path cannot be empty.");
-		}
+			if (trimmedInput.length === 0) {
+				throw new Error("Entrypoint path cannot be empty.");
+			}
 
-		assertNoParentDirectoryReference(trimmedInput);
+			assertNoParentDirectoryReference(trimmedInput);
 
-		const normalizedPath = normalizePath(trimmedInput.replace(/^\.[\\/]/, ""));
+			const normalizedPath = normalizePath(trimmedInput.replace(/^\.[\\/]/, ""));
 
-		if (path.posix.isAbsolute(normalizedPath)) {
-			throw new Error(`Entrypoint path must be relative: "${input}".`);
-		}
+			if (path.posix.isAbsolute(normalizedPath)) {
+				throw new Error(`Entrypoint path must be relative: "${input}".`);
+			}
 
-		if (normalizedPath === "src") {
-			throw new Error(`Entrypoint path "${input}" does not point to a file inside src directory.`);
-		}
+			if (normalizedPath === "src") {
+				throw new Error(`Entrypoint path "${input}" does not point to a file inside src directory.`);
+			}
 
-		const pathRelativeToSource = normalizedPath.startsWith(SOURCE_DIRECTORY_PREFIX)
-			? normalizedPath.slice(SOURCE_DIRECTORY_PREFIX.length)
-			: normalizedPath;
+			const pathRelativeToSource = normalizedPath.startsWith(SOURCE_DIRECTORY_PREFIX)
+				? normalizedPath.slice(SOURCE_DIRECTORY_PREFIX.length)
+				: normalizedPath;
 
-		if (pathRelativeToSource.length === 0 || pathRelativeToSource === ".") {
-			throw new Error(`Entrypoint path "${input}" does not point to a file inside src directory.`);
-		}
+			if (pathRelativeToSource.length === 0 || pathRelativeToSource === ".") {
+				throw new Error(`Entrypoint path "${input}" does not point to a file inside src directory.`);
+			}
 
-		const pathWithSourcePrefix = `${SOURCE_DIRECTORY_PREFIX}${pathRelativeToSource}`;
-		const pathWithoutExtension = removeExtension(pathRelativeToSource);
+			const pathWithSourcePrefix = `${SOURCE_DIRECTORY_PREFIX}${pathRelativeToSource}`;
+			const pathWithoutExtension = removeExtension(pathRelativeToSource);
 
-		if (pathWithoutExtension === "index") {
-			return new Entrypoint(undefined, pathWithSourcePrefix);
-		}
+			if (pathWithoutExtension === "index") {
+				return new Entrypoint(undefined, pathWithSourcePrefix);
+			}
 
-		if (pathWithoutExtension.endsWith(INDEX_SEGMENT)) {
-			return new Entrypoint(pathWithoutExtension.slice(0, -INDEX_SEGMENT.length), pathWithSourcePrefix);
-		}
+			if (pathWithoutExtension.endsWith(INDEX_SEGMENT)) {
+				return new Entrypoint(pathWithoutExtension.slice(0, -INDEX_SEGMENT.length), pathWithSourcePrefix);
+			}
 
-		return new Entrypoint(pathWithoutExtension, pathWithSourcePrefix);
+			return new Entrypoint(pathWithoutExtension, pathWithSourcePrefix);
+		});
 	}
 }
 

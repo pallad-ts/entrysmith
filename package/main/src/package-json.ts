@@ -1,4 +1,4 @@
-import { just, none } from "@sweet-monads/maybe";
+import PackageJson from "@npmcli/package-json";
 import path from "node:path";
 
 import type { ResolvedEntrypoint } from "./model/resolved-entrypoint";
@@ -9,10 +9,6 @@ export type PackageJsonFile = {
 	content: PackageJsonContent;
 	update(values: Record<string, unknown>): void;
 	save(): Promise<void>;
-};
-
-type PackageJsonModule = {
-	load(projectDirectory: string): Promise<PackageJsonFile>;
 };
 
 type PackageJsonContent = {
@@ -27,8 +23,7 @@ type PackageJsonUpdateResult = {
 };
 
 export async function loadPackageJson(projectDirectory: string): Promise<PackageJsonFile> {
-	const packageJsonModule = await getPackageJsonModule();
-	return packageJsonModule.load(projectDirectory);
+	return PackageJson.load(projectDirectory);
 }
 
 export function getPackageDependencies(packageJson: PackageJsonFile): string[] {
@@ -148,23 +143,4 @@ function toPosixPath(value: string): string {
 
 function isDeepEqual(left: unknown, right: unknown): boolean {
 	return JSON.stringify(left) === JSON.stringify(right);
-}
-
-let packageJsonModulePromise = none<Promise<PackageJsonModule>>();
-
-async function getPackageJsonModule(): Promise<PackageJsonModule> {
-	if (packageJsonModulePromise.isNone()) {
-		const loadPromise = import("@npmcli/package-json").then(module => {
-			const loadedModule = (module as { default?: PackageJsonModule }).default ?? (module as unknown as PackageJsonModule);
-			if (typeof loadedModule.load !== "function") {
-				throw new Error("Failed to load @npmcli/package-json module.");
-			}
-
-			return loadedModule;
-		});
-
-		packageJsonModulePromise = just(loadPromise);
-	}
-
-	return packageJsonModulePromise.unwrap();
 }
