@@ -48,5 +48,3 @@ export async function loadDependencyConfig(packageDirectory: string): Promise<Ei
 
 	return right(parsedConfig.data);
 }
-
-export const loadDependency = loadDependencyConfig;

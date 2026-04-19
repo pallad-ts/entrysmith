@@ -1,0 +1,19 @@
+{
+  "name": "@example/app",
+  "private": true,
+  "dependencies": {
+    "@example/lib": "workspace:*"
+  },
+  "entrysmith": {
+    "entrypoints": [
+      "index.ts"
+    ],
+    "entrypointOutputMode": "commonjs",
+    "typescript": {
+      "referenceTsConfigPaths": [
+        "tsconfig.json"
+      ]
+    },
+    "packageOutputDirectory": "dist"
+  }
+}
