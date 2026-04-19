@@ -2,10 +2,31 @@
   "name": "@pallad/entrysmith",
   "version": "0.0.0",
   "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "yarn run -TB tsc -p tsconfig.json",
     "test": "yarn run -TB vitest run --passWithNoTests",
     "lint": "yarn run -TB eslint src/**/*.ts",
     "generate-barrels": "yarn run -TB barrelsby -l replace -L --delete -d ./src"
+  },
+  "dependencies": {
+    "@manypkg/get-packages": "^3.1.0",
+    "@npmcli/package-json": "^7.0.0",
+    "@pallad/common-errors": "^2.2.0",
+    "@sweet-monads/either": "^3.3.1",
+    "@sweet-monads/maybe": "^3.3.1",
+    "cosmiconfig": "^9.0.0",
+    "cosmiconfig-typescript-loader": "^6.1.0",
+    "jsonc-parser": "^3.3.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   },
   "packageManager": "yarn@4.11.0"
 }

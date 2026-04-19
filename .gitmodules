@@ -1,0 +1,3 @@
+[submodule "ai-conventions/general"]
+	path = ai-conventions/general
+	url = git@github.com:wookieb/conventions.git

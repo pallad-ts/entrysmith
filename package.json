@@ -1,11 +1,14 @@
 {
   "name": "@pallad/entrysmith-monorepo",
   "version": "1.0.0",
-  "packageManager": "yarn@4.11.0",
+  "packageManager": "yarn@4.14.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pallad-ts/entrysmith.git"
   },
+  "workspaces": [
+    "package/*"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -14,7 +17,15 @@
   "homepage": "https://github.com/pallad-ts/entrysmith#readme",
   "description": "",
   "devDependencies": {
+    "@pallad/eslint-config": "^2",
     "@pallad/plop-templates": "^1.4.0",
-    "plop": "^4.0.5"
+    "@trivago/prettier-plugin-sort-imports": "^6",
+    "@types/node": "^24",
+    "barrelsby": "^2",
+    "eslint": "^9",
+    "plop": "^4.0.5",
+    "prettier": "^3",
+    "typescript": "^5",
+    "vitest": "^4.1.4"
   }
 }
