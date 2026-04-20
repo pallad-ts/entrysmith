@@ -4,9 +4,11 @@ import { cosmiconfig } from "cosmiconfig";
 import { TypeScriptLoader } from "cosmiconfig-typescript-loader";
 import { z } from "zod";
 
+export const DependencyEntrypointOutputModeSchema = z.enum(["commonjs", "module"]);
+export type DependencyEntrypointOutputMode = z.infer<typeof DependencyEntrypointOutputModeSchema>;
 export const DependencyConfigSchema = z.object({
 	entrypoints: z.array(z.string().min(1, "Entrypoint path cannot be empty")),
-	entrypointOutputMode: z.enum(["commonjs", "module"]),
+	entrypointOutputMode: DependencyEntrypointOutputModeSchema,
 	typescript: z
 		.object({
 			tsConfigTargetPath: z.string().min(1).optional(),

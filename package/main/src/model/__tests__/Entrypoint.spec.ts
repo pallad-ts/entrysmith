@@ -6,8 +6,8 @@ describe("Entrypoint", () => {
 
 		expect(entrypoint.unwrap()).toMatchInlineSnapshot(`
 			Entrypoint {
-			  "name": undefined,
-			  "path": "src/index.ts",
+			  "directory": undefined,
+			  "name": "index",
 			}
 		`);
 	});
@@ -17,8 +17,8 @@ describe("Entrypoint", () => {
 
 		expect(entrypoint.unwrap()).toMatchInlineSnapshot(`
 			Entrypoint {
-			  "name": "main",
-			  "path": "src/main/index.ts",
+			  "directory": "main",
+			  "name": "index",
 			}
 		`);
 	});
@@ -28,8 +28,8 @@ describe("Entrypoint", () => {
 
 		expect(entrypoint.unwrap()).toMatchInlineSnapshot(`
 			Entrypoint {
-			  "name": "main/another",
-			  "path": "src/main/another.ts",
+			  "directory": "main",
+			  "name": "another",
 			}
 		`);
 	});
@@ -39,10 +39,22 @@ describe("Entrypoint", () => {
 
 		expect(entrypoint.unwrap()).toMatchInlineSnapshot(`
 			Entrypoint {
-			  "name": "main",
-			  "path": "src/main/index.ts",
+			  "directory": "main",
+			  "name": "index",
 			}
 		`);
+	});
+
+	it("builds source path for root entrypoint", () => {
+		const entrypoint = Entrypoint.fromString("index.ts").unwrap();
+
+		expect(entrypoint.sourcePath("src")).toBe("src/index.ts");
+	});
+
+	it("builds source path for nested entrypoint", () => {
+		const entrypoint = Entrypoint.fromString("main/index.ts").unwrap();
+
+		expect(entrypoint.sourcePath("src")).toBe("src/main/index.ts");
 	});
 
 	it("rejects parent directory traversal", () => {
@@ -57,21 +69,21 @@ describe("Entrypoint", () => {
 		}
 	});
 
-	it("builds distribution path for root entrypoint", () => {
+	it("builds destination path for root entrypoint", () => {
 		const entrypoint = Entrypoint.fromString("index.ts").unwrap();
 
-		expect(entrypoint.distributionPath("dist")).toBe("dist/index.js");
+		expect(entrypoint.destinationPath("dist")).toBe("dist/index.js");
 	});
 
-	it("builds distribution path for nested entrypoint", () => {
+	it("builds destination path for nested entrypoint", () => {
 		const entrypoint = Entrypoint.fromString("main/another.ts").unwrap();
 
-		expect(entrypoint.distributionPath("build/esm")).toBe("build/esm/main/another.js");
+		expect(entrypoint.destinationPath("build/esm")).toBe("build/esm/main/another.js");
 	});
 
-	it("normalizes distribution directory separators", () => {
+	it("normalizes destination directory separators", () => {
 		const entrypoint = Entrypoint.fromString("main/index.ts").unwrap();
 
-		expect(entrypoint.distributionPath(".\\dist\\esm")).toBe("dist/esm/main/index.js");
+		expect(entrypoint.destinationPath(".\\dist\\esm")).toBe("dist/esm/main/index.js");
 	});
 });

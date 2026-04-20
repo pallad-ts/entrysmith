@@ -3,9 +3,10 @@ import { PackageJson, PackageJsonExports, readPackageJSON, writePackageJSON } fr
 import * as path from "node:path";
 
 import { Dependency } from "../model/Dependency";
+import { Entrypoint } from "../model/Entrypoint";
 import { Project } from "../model/Project";
-
-const SOURCE_DIRECTORY_PREFIX = "src/";
+import { createExportForEntrypoint } from "./internal/createExportForEntrypoint";
+import { loadProjectAndDependency } from "./internal/loadProjectAndDependency";
 
 type PackageJsonExportsMap = Record<string, PackageJsonExports | undefined>;
 
@@ -28,10 +29,14 @@ async function applyPackageJsonChanges(dependency: Dependency, project: Project)
 		files.push(dependency.config.packageOutputDirectory);
 	}
 
-	const exportsField = normalizePackageJsonExports(packageJson.exports);
-	for (const entrypoint of dependency.entrypointList) {
-		const key = entrypoint.name === undefined ? "." : `./${entrypoint.name}`;
-		exportsField[key] = createEntrypointExport(dependency, entrypoint.path);
+	const exportsField: PackageJsonExportsMap = {};
+	for (const entrypoint of [...dependency.entrypointList].sort(compareEntrypointsByName)) {
+		const [key, value] = createExportForEntrypoint(
+			entrypoint,
+			dependency.config.packageOutputDirectory,
+			dependency.config.entrypointOutputMode
+		);
+		exportsField[key] = value;
 	}
 
 	exportsField["./package.json"] = "./package.json";
@@ -50,58 +55,6 @@ function applyTsConfigChanges(dependency: Dependency, project: Project): void {
 	void project;
 }
 
-function normalizePackageJsonExports(exportsField: PackageJson["exports"]): PackageJsonExportsMap {
-	if (exportsField === undefined) {
-		return {};
-	}
-
-	if (typeof exportsField === "string" || Array.isArray(exportsField)) {
-		return {
-			".": exportsField,
-		};
-	}
-
-	return {
-		...exportsField,
-	};
-}
-
-function createEntrypointExport(dependency: Dependency, entrypointPath: string): { import: string } | { default: string } {
-	const sourceRelativePath = entrypointPath.startsWith(SOURCE_DIRECTORY_PREFIX)
-		? entrypointPath.slice(SOURCE_DIRECTORY_PREFIX.length)
-		: entrypointPath;
-	const extension = path.posix.extname(sourceRelativePath);
-	const pathWithoutExtension = extension.length === 0 ? sourceRelativePath : sourceRelativePath.slice(0, -extension.length);
-	const outputPath = `./${path.posix.join(dependency.config.packageOutputDirectory, `${pathWithoutExtension}.js`)}`;
-
-	if (dependency.config.entrypointOutputMode === "commonjs") {
-		return {
-			default: outputPath,
-		};
-	}
-
-	return {
-		import: outputPath,
-	};
-}
-
-async function loadProjectAndDependency(absolutePackagePath: string): Promise<{ dependency: Dependency; project: Project }> {
-	const projectResult = await Project.load(absolutePackagePath);
-	if (projectResult.isLeft()) {
-		throw projectResult.value;
-	}
-
-	const project = projectResult.value;
-	const dependency = project.dependencyList.find(candidate => {
-		return path.resolve(project.path, candidate.path) === absolutePackagePath;
-	});
-
-	if (dependency) {
-		return {
-			dependency,
-			project,
-		};
-	}
-
-	throw new Error(`Unable to resolve entrysmith package for path ${absolutePackagePath}`);
+function compareEntrypointsByName(left: Entrypoint, right: Entrypoint): number {
+	return left.fullName.localeCompare(right.fullName);
 }

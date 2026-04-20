@@ -5,30 +5,29 @@ import * as path from "node:path";
 import { normalizePath } from "../util/normalizePath";
 
 const SOURCE_DIRECTORY_PREFIX = "src/";
-const INDEX_SEGMENT = "/index";
 
 export class Entrypoint {
 	constructor(
-		readonly name: string | undefined,
-		readonly path: string
+		readonly name: string,
+		readonly directory: string | undefined
 	) {
-		if (path.length === 0) {
-			throw new Error("Entrypoint path cannot be empty.");
+		if (name.length === 0) {
+			throw new Error("Entrypoint name cannot be empty.");
 		}
 
-		if (name !== undefined && name.length === 0) {
-			throw new Error("Entrypoint name cannot be empty.");
+		if (directory !== undefined && directory.length === 0) {
+			throw new Error("Entrypoint directory cannot be empty.");
 		}
 	}
 
-	distributionPath(distributionDirectory: string) {
-		const normalizedEntrypointPath = normalizePath(this.path);
-		const normalizedDistributionDirectory = normalizePath(distributionDirectory);
-		const pathRelativeToSource = normalizedEntrypointPath.startsWith(SOURCE_DIRECTORY_PREFIX)
-			? normalizedEntrypointPath.slice(SOURCE_DIRECTORY_PREFIX.length)
-			: normalizedEntrypointPath;
+	sourcePath(sourceDirectory: string): string {
+		const normalizedSourceDirectory = normalizePath(sourceDirectory);
+		return path.posix.join(normalizedSourceDirectory, `${this.fullName}.ts`);
+	}
 
-		return `${removeExtension(path.posix.join(normalizedDistributionDirectory, pathRelativeToSource))}.js`;
+	destinationPath(destinationDirectory: string): string {
+		const normalizedDestinationDirectory = normalizePath(destinationDirectory);
+		return path.posix.join(normalizedDestinationDirectory, `${this.fullName}.js`);
 	}
 
 	static fromString(input: string): Either<Error, Entrypoint> {
@@ -59,19 +58,20 @@ export class Entrypoint {
 				throw new Error(`Entrypoint path "${input}" does not point to a file inside src directory.`);
 			}
 
-			const pathWithSourcePrefix = `${SOURCE_DIRECTORY_PREFIX}${pathRelativeToSource}`;
 			const pathWithoutExtension = removeExtension(pathRelativeToSource);
+			const name = path.posix.basename(pathWithoutExtension);
+			const directory = path.posix.dirname(pathWithoutExtension);
 
-			if (pathWithoutExtension === "index") {
-				return new Entrypoint(undefined, pathWithSourcePrefix);
-			}
-
-			if (pathWithoutExtension.endsWith(INDEX_SEGMENT)) {
-				return new Entrypoint(pathWithoutExtension.slice(0, -INDEX_SEGMENT.length), pathWithSourcePrefix);
-			}
-
-			return new Entrypoint(pathWithoutExtension, pathWithSourcePrefix);
+			return new Entrypoint(name, directory === "." ? undefined : directory);
 		});
+	}
+
+	get fullName(): string {
+		if (this.directory === undefined) {
+			return this.name;
+		}
+
+		return path.posix.join(this.directory, this.name);
 	}
 }
 

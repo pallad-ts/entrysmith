@@ -32,8 +32,8 @@ describe("Project", () => {
 			      },
 			      "entrypointList": [
 			        Entrypoint {
-			          "name": undefined,
-			          "path": "src/index.ts",
+			          "directory": undefined,
+			          "name": "index",
 			        },
 			      ],
 			      "name": "@example/app",
@@ -56,12 +56,12 @@ describe("Project", () => {
 			      },
 			      "entrypointList": [
 			        Entrypoint {
-			          "name": "model",
-			          "path": "src/model/index.ts",
+			          "directory": "model",
+			          "name": "index",
 			        },
 			        Entrypoint {
-			          "name": "test/another",
-			          "path": "src/test/another.ts",
+			          "directory": "test",
+			          "name": "another",
 			        },
 			      ],
 			      "name": "@example/lib",
