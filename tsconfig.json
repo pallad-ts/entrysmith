@@ -2,7 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "importHelpers": true,
-    "module": "commonjs",
+    "module": "node20",
     "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "strict": true,

@@ -21,6 +21,16 @@ export class Entrypoint {
 		}
 	}
 
+	distributionPath(distributionDirectory: string) {
+		const normalizedEntrypointPath = normalizePath(this.path);
+		const normalizedDistributionDirectory = normalizePath(distributionDirectory);
+		const pathRelativeToSource = normalizedEntrypointPath.startsWith(SOURCE_DIRECTORY_PREFIX)
+			? normalizedEntrypointPath.slice(SOURCE_DIRECTORY_PREFIX.length)
+			: normalizedEntrypointPath;
+
+		return `${removeExtension(path.posix.join(normalizedDistributionDirectory, pathRelativeToSource))}.js`;
+	}
+
 	static fromString(input: string): Either<Error, Entrypoint> {
 		return fromTry(() => {
 			const trimmedInput = input.trim();

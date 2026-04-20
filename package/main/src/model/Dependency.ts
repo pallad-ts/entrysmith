@@ -1,9 +1,9 @@
 import { type Either, mergeInOne, fromPromise } from "@sweet-monads/either";
+import { readPackageJSON } from "pkg-types";
 import { z } from "zod";
 
 import * as path from "node:path";
 
-import { loadPackageJson } from "../util/loadPackageJson";
 import { loadDependencyConfig, type DependencyConfig, type DependencyConfigLoadError } from "./DependencyConfig";
 import { Entrypoint } from "./Entrypoint";
 
@@ -37,6 +37,10 @@ export class Dependency {
 		}
 	}
 
+	get packageJsonPath() {
+		return path.join(this.path, "package.json");
+	}
+
 	static async load(projectPath: string, dependencyPath: string): Promise<Either<DependencyLoadError, Dependency>> {
 		const absolutePath = path.resolve(projectPath, dependencyPath);
 
@@ -54,7 +58,7 @@ const packageSchema = z.object({
 	name: z.string().min(1, "Package name cannot be empty"),
 });
 async function loadDependencyNameFromPackageJson(absolutePath: string): Promise<Either<Error, string>> {
-	return (await fromPromise(loadPackageJson(absolutePath)))
+	return (await fromPromise(readPackageJSON(absolutePath)))
 		.mapLeft(error => {
 			return new Error(
 				`Failed to load package.json for dependency at ${absolutePath}: ${error instanceof Error ? error.message : String(error)}`

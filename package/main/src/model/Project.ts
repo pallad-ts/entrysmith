@@ -8,19 +8,19 @@ import { Dependency } from "./Dependency";
 
 export class Project {
 	constructor(
-		readonly projectPath: string,
+		readonly path: string,
 		readonly dependencyList: Dependency[]
 	) {}
 
 	static async load(projectPath: string): Promise<Either<Error, Project>> {
 		const packageCollection = await getPackages(projectPath);
 
-		const dependenciesResult = await loadDependencies(projectPath, packageCollection.packages);
+		const dependenciesResult = await loadDependencies(packageCollection.rootDir, packageCollection.packages);
 		if (dependenciesResult.isLeft()) {
 			return left(dependenciesResult.value);
 		}
 
-		return right(new Project(projectPath, dependenciesResult.value));
+		return right(new Project(packageCollection.rootDir, dependenciesResult.value));
 	}
 }
 

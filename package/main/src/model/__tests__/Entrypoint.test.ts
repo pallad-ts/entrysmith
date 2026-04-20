@@ -56,4 +56,22 @@ describe("Entrypoint", () => {
 			);
 		}
 	});
+
+	it("builds distribution path for root entrypoint", () => {
+		const entrypoint = Entrypoint.fromString("index.ts").unwrap();
+
+		expect(entrypoint.distributionPath("dist")).toBe("dist/index.js");
+	});
+
+	it("builds distribution path for nested entrypoint", () => {
+		const entrypoint = Entrypoint.fromString("main/another.ts").unwrap();
+
+		expect(entrypoint.distributionPath("build/esm")).toBe("build/esm/main/another.js");
+	});
+
+	it("normalizes distribution directory separators", () => {
+		const entrypoint = Entrypoint.fromString("main/index.ts").unwrap();
+
+		expect(entrypoint.distributionPath(".\\dist\\esm")).toBe("dist/esm/main/index.js");
+	});
 });

@@ -10,9 +10,11 @@ describe("Project", () => {
 
 		const projectResult = await Project.load(projectPath);
 
-		expect(projectResult.unwrap()).toMatchInlineSnapshot({
-			projectPath: expect.stringMatching(/example-monorepo$/),
-		}, `
+		expect(projectResult.unwrap()).toMatchInlineSnapshot(
+			{
+				path: expect.stringMatching(/example-monorepo$/),
+			},
+			`
 			{
 			  "dependencyList": [
 			    Dependency {
@@ -66,8 +68,9 @@ describe("Project", () => {
 			      "path": "packages/lib",
 			    },
 			  ],
-			  "projectPath": StringMatching /example-monorepo\\$/,
+			  "path": StringMatching /example-monorepo\\$/,
 			}
-		`);
+		`
+		);
 	});
 });
