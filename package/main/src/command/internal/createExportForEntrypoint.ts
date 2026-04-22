@@ -9,7 +9,7 @@ export function createExportForEntrypoint(
 	const key = toPackageExportKey(entrypoint);
 	const path = `./${entrypoint.destinationPath(destinationDirectory)}`;
 
-	if (outputMode === "commonjs") {
+	if (outputMode === "cjs") {
 		return [key, { default: path }];
 	}
 
