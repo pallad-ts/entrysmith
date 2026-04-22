@@ -1,5 +1,4 @@
 import { NotFoundError } from "@pallad/common-errors";
-import { left, right, type Either } from "@sweet-monads/either";
 import { cosmiconfig } from "cosmiconfig";
 import { TypeScriptLoader } from "cosmiconfig-typescript-loader";
 import { z } from "zod";
@@ -20,12 +19,10 @@ export const DependencyConfigSchema = z.object({
 
 export type DependencyConfig = z.infer<typeof DependencyConfigSchema>;
 
-export type DependencyConfigLoadError = Error | z.ZodError;
-
 const CONFIG_NAME = "entrysmith";
 const SEARCH_PLACES = ["package.json", "entrysmith.config.js", "entrysmith.config.ts", "entrysmith.config.json"];
 
-export async function loadDependencyConfig(packageDirectory: string): Promise<Either<DependencyConfigLoadError, DependencyConfig>> {
+export async function loadDependencyConfig(packageDirectory: string): Promise<DependencyConfig> {
 	const explorer = cosmiconfig(CONFIG_NAME, {
 		searchPlaces: SEARCH_PLACES,
 		stopDir: packageDirectory,
@@ -36,17 +33,15 @@ export async function loadDependencyConfig(packageDirectory: string): Promise<Ei
 
 	const searchResult = await explorer.search(packageDirectory);
 	if (!searchResult || searchResult.isEmpty) {
-		return left(
-			new NotFoundError(
-				`Unable to find entrysmith configuration in ${packageDirectory}. Expected one of: ${SEARCH_PLACES.join(", ")}`
-			)
+		throw new NotFoundError(
+			`Unable to find entrysmith configuration in ${packageDirectory}. Expected one of: ${SEARCH_PLACES.join(", ")}`
 		);
 	}
 
 	const parsedConfig = DependencyConfigSchema.safeParse(searchResult.config);
 	if (!parsedConfig.success) {
-		return left(parsedConfig.error);
+		throw parsedConfig.error;
 	}
 
-	return right(parsedConfig.data);
+	return parsedConfig.data;
 }

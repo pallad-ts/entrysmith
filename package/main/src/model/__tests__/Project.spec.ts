@@ -8,8 +8,7 @@ describe("Project", () => {
 	it("loads dependencies from fixture workspace", async () => {
 		const projectPath = path.resolve(__dirname, "../../__tests__/example-monorepo");
 
-		const projectResult = await Project.load(projectPath);
-		const project = projectResult.unwrap();
+		const project = await Project.load(projectPath);
 
 		expect({
 			path: project.path,

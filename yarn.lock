@@ -494,7 +494,6 @@ __metadata:
   dependencies:
     "@manypkg/get-packages": "npm:^3.1.0"
     "@pallad/common-errors": "npm:^2.2.0"
-    "@sweet-monads/either": "npm:^3.3.1"
     "@sweet-monads/maybe": "npm:^3.3.1"
     commander: "npm:^14.0.1"
     cosmiconfig: "npm:^9.0.0"
@@ -662,15 +661,6 @@ __metadata:
   version: 1.1.0
   resolution: "@standard-schema/spec@npm:1.1.0"
   checksum: 10/a209615c9e8b2ea535d7db0a5f6aa0f962fd4ab73ee86a46c100fb78116964af1f55a27c1794d4801e534a196794223daa25ff5135021e03c7828aa3d95e1763
-  languageName: node
-  linkType: hard
-
-"@sweet-monads/either@npm:^3.3.1":
-  version: 3.3.1
-  resolution: "@sweet-monads/either@npm:3.3.1"
-  dependencies:
-    "@sweet-monads/interfaces": "npm:^3.3.0"
-  checksum: 10/42b8525272eb0390e91cd6fd8557215dfb4f783eedbbd09d9f6260b64a53c17419bf63bc0bf8619ca696d55c4879ddc8b8b4bc8e64339246d66d1edf56cae89b
   languageName: node
   linkType: hard
 

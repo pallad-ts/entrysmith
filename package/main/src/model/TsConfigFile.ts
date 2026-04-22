@@ -1,4 +1,3 @@
-import { Either, fromPromise, left, right } from "@sweet-monads/either";
 import { writeTSConfig, readTSConfig, TSConfig } from "pkg-types";
 
 import { rm } from "node:fs/promises";
@@ -56,15 +55,15 @@ export class TsConfigFile {
 		await writeTSConfig(this.path, this.content);
 	}
 
-	static async load(path: string): Promise<Either<Error, TsConfigFile>> {
-		const result = await fromPromise<Error, TSConfig>(readTSConfig(path));
-		if (result.isLeft()) {
-			if ("code" in result.value && result.value.code === "ENOENT") {
-				return right(new TsConfigFile(path, undefined));
+	static async load(path: string): Promise<TsConfigFile> {
+		try {
+			return new TsConfigFile(path, await readTSConfig(path));
+		} catch (error) {
+			if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
+				return new TsConfigFile(path, undefined);
 			}
-			return left(result.value);
-		}
 
-		return right(new TsConfigFile(path, result.value));
+			throw error;
+		}
 	}
 }

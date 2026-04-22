@@ -4,12 +4,7 @@ import { Dependency } from "../../model/Dependency";
 import { Project } from "../../model/Project";
 
 export async function loadProjectAndDependency(absolutePackagePath: string): Promise<{ dependency: Dependency; project: Project }> {
-	const projectResult = await Project.load(absolutePackagePath);
-	if (projectResult.isLeft()) {
-		throw projectResult.value;
-	}
-
-	const project = projectResult.value;
+	const project = await Project.load(absolutePackagePath);
 	const dependency = project.dependencyList.find(candidate => {
 		return path.resolve(project.path, candidate.path) === absolutePackagePath;
 	});

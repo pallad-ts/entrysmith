@@ -1,14 +1,9 @@
-import { NotFoundError } from "@pallad/common-errors";
-import { type Either, left, mergeInOne } from "@sweet-monads/either";
-
 import * as path from "node:path";
 
-import { loadDependencyConfig, type DependencyConfig, type DependencyConfigLoadError } from "./DependencyConfig";
+import { loadDependencyConfig, type DependencyConfig } from "./DependencyConfig";
 import { Entrypoint } from "./Entrypoint";
 import { PackageJsonFile } from "./PackageJsonFile";
 import { TsConfigFile } from "./TsConfigFile";
-
-export type DependencyLoadError = DependencyConfigLoadError | Error | NotFoundError;
 
 export class Dependency {
 	constructor(
@@ -40,51 +35,40 @@ export class Dependency {
 		}
 	}
 
-	get packageJsonPath() {
-		return path.join(this.path, "package.json");
-	}
-
-	static async load(projectPath: string, dependencyPath: string): Promise<Either<DependencyLoadError, Dependency>> {
+	static async load(projectPath: string, dependencyPath: string): Promise<Dependency> {
 		const dependencyAbsolutePath = path.resolve(projectPath, dependencyPath);
-		const [packageJsonResult, configResult] = await Promise.all([
+		const [packageJson, config] = await Promise.all([
 			loadDependencyPackageJson(dependencyAbsolutePath),
 			loadDependencyConfig(dependencyAbsolutePath),
 		]);
-		const dependencyMetadataResult = mergeInOne([packageJsonResult, configResult]);
-		if (dependencyMetadataResult.isLeft()) {
-			return left(dependencyMetadataResult.value);
-		}
-
-		const [packageJson, config] = dependencyMetadataResult.value;
 		if (typeof packageJson.name !== "string" || packageJson.name.length === 0) {
-			return left(new Error("Package name cannot be empty"));
+			throw new Error("Package name cannot be empty");
 		}
 
-		const entrypointListResult = mergeInOne(config.entrypoints.map(entrypoint => Entrypoint.fromString(entrypoint)));
-		const tsConfigFilesResult = await loadDependencyTsConfigFiles(dependencyAbsolutePath, config);
+		const entrypointList = config.entrypoints.map(entrypoint => Entrypoint.fromString(entrypoint));
+		const tsConfigFiles = await loadDependencyTsConfigFiles(dependencyAbsolutePath, config);
 
-		return mergeInOne([entrypointListResult, tsConfigFilesResult]).map(([entrypointList, tsConfigFiles]) => {
-			return new Dependency(packageJson.name!, dependencyPath, packageJson, entrypointList, tsConfigFiles, config);
-		});
+		return new Dependency(packageJson.name, dependencyPath, packageJson, entrypointList, tsConfigFiles, config);
 	}
 }
 
-async function loadDependencyTsConfigFiles(packagePath: string, config: DependencyConfig): Promise<Either<Error, TsConfigFile[]>> {
+async function loadDependencyTsConfigFiles(packagePath: string, config: DependencyConfig): Promise<TsConfigFile[]> {
 	const tsConfigPathSet = new Set(config.typescript.referenceTsConfigPaths);
 	if (config.typescript.tsConfigTargetPath) {
 		tsConfigPathSet.add(config.typescript.tsConfigTargetPath);
 	}
 
-	return mergeInOne(
-		await Promise.all(
-			[...tsConfigPathSet].sort().map(tsConfigPath => {
-				return TsConfigFile.load(path.resolve(packagePath, tsConfigPath));
-			})
-		)
+	return Promise.all(
+		[...tsConfigPathSet].sort().map(tsConfigPath => {
+			return TsConfigFile.load(path.resolve(packagePath, tsConfigPath));
+		})
 	);
 }
-async function loadDependencyPackageJson(packagePath: string): Promise<Either<Error, PackageJsonFile>> {
-	return (await PackageJsonFile.load(path.resolve(packagePath, "package.json"))).mapLeft(error => {
-		return new Error(`Failed to load package.json for dependency at ${packagePath}: ${error.message}`);
-	});
+async function loadDependencyPackageJson(packagePath: string): Promise<PackageJsonFile> {
+	try {
+		return await PackageJsonFile.load(path.resolve(packagePath, "package.json"));
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		throw new Error(`Failed to load package.json for dependency at ${packagePath}: ${message}`);
+	}
 }

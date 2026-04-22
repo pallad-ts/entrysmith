@@ -1,6 +1,5 @@
 import { getPackages } from "@manypkg/get-packages";
 import { NotFoundError } from "@pallad/common-errors";
-import { type Either, left, right } from "@sweet-monads/either";
 
 import * as path from "node:path";
 
@@ -12,38 +11,33 @@ export class Project {
 		readonly dependencyList: Dependency[]
 	) {}
 
-	static async load(projectPath: string): Promise<Either<Error, Project>> {
+	static async load(projectPath: string): Promise<Project> {
 		const packageCollection = await getPackages(projectPath);
+		const dependencyList = await loadDependencies(packageCollection.rootDir, packageCollection.packages);
 
-		const dependenciesResult = await loadDependencies(packageCollection.rootDir, packageCollection.packages);
-		if (dependenciesResult.isLeft()) {
-			return left(dependenciesResult.value);
-		}
-
-		return right(new Project(packageCollection.rootDir, dependenciesResult.value));
+		return new Project(packageCollection.rootDir, dependencyList);
 	}
 }
 
 async function loadDependencies(
 	projectPath: string,
 	workspacePackages: Awaited<ReturnType<typeof getPackages>>["packages"]
-): Promise<Either<Error, Dependency[]>> {
+): Promise<Dependency[]> {
 	const dependencyList: Dependency[] = [];
 
 	for (const workspacePackage of workspacePackages) {
 		const dependencyPath = path.relative(projectPath, path.resolve(workspacePackage.dir));
-		const dependencyResult = await Dependency.load(projectPath, dependencyPath);
 
-		if (dependencyResult.isLeft()) {
-			if (dependencyResult.value instanceof NotFoundError) {
+		try {
+			dependencyList.push(await Dependency.load(projectPath, dependencyPath));
+		} catch (error) {
+			if (error instanceof NotFoundError) {
 				continue;
 			}
 
-			return left(dependencyResult.value);
+			throw error;
 		}
-
-		dependencyList.push(dependencyResult.value);
 	}
 
-	return right(dependencyList);
+	return dependencyList;
 }

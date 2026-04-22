@@ -1,4 +1,3 @@
-import { Either, fromPromise } from "@sweet-monads/either";
 import { PackageJson, readPackageJSON, writePackageJSON } from "pkg-types";
 
 export class PackageJsonFile {
@@ -43,7 +42,7 @@ export class PackageJsonFile {
 		await writePackageJSON(this.path, this.content);
 	}
 
-	static async load(path: string): Promise<Either<Error, PackageJsonFile>> {
-		return (await fromPromise<Error, PackageJson>(readPackageJSON(path))).map(content => new PackageJsonFile(path, content));
+	static async load(path: string): Promise<PackageJsonFile> {
+		return new PackageJsonFile(path, await readPackageJSON(path));
 	}
 }
