@@ -8,10 +8,11 @@
     "entrypoints": [
       "index.ts"
     ],
-    "entrypointOutputMode": "commonjs",
+    "entrypointOutputMode": "esm",
     "typescript": {
       "referenceTsConfigPaths": [
-        "tsconfig.json"
+        "tsconfig.json",
+        "tsconfig.build.json"
       ]
     },
     "packageOutputDirectory": "dist"

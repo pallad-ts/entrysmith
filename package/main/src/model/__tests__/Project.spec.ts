@@ -9,17 +9,43 @@ describe("Project", () => {
 		const projectPath = path.resolve(__dirname, "../../__tests__/example-monorepo");
 
 		const projectResult = await Project.load(projectPath);
+		const project = projectResult.unwrap();
 
-		expect(projectResult.unwrap()).toMatchInlineSnapshot(
+		expect({
+			path: project.path,
+			dependencyList: project.dependencyList.map(dependency => {
+				return {
+					config: dependency.config,
+					entrypointList: dependency.entrypointList.map(entrypoint => {
+						return {
+							directory: entrypoint.directory,
+							name: entrypoint.name,
+						};
+					}),
+					name: dependency.name,
+					packageJson: {
+						content: dependency.packageJson.content,
+						path: path.relative(projectPath, dependency.packageJson.path),
+					},
+					path: dependency.path,
+					tsConfigFiles: dependency.tsConfigFiles.map(tsConfigFile => {
+						return {
+							content: tsConfigFile.content,
+							path: path.relative(projectPath, tsConfigFile.path),
+						};
+					}),
+				};
+			}),
+		}).toMatchInlineSnapshot(
 			{
 				path: expect.stringMatching(/example-monorepo$/),
 			},
 			`
 			{
 			  "dependencyList": [
-			    Dependency {
+			    {
 			      "config": {
-			        "entrypointOutputMode": "commonjs",
+			        "entrypointOutputMode": "esm",
 			        "entrypoints": [
 			          "index.ts",
 			        ],
@@ -27,21 +53,67 @@ describe("Project", () => {
 			        "typescript": {
 			          "referenceTsConfigPaths": [
 			            "tsconfig.json",
+			            "tsconfig.build.json",
 			          ],
 			        },
 			      },
 			      "entrypointList": [
-			        Entrypoint {
+			        {
 			          "directory": undefined,
 			          "name": "index",
 			        },
 			      ],
 			      "name": "@example/app",
+			      "packageJson": {
+			        "content": {
+			          "dependencies": {
+			            "@example/lib": "workspace:*",
+			          },
+			          "entrysmith": {
+			            "entrypointOutputMode": "esm",
+			            "entrypoints": [
+			              "index.ts",
+			            ],
+			            "packageOutputDirectory": "dist",
+			            "typescript": {
+			              "referenceTsConfigPaths": [
+			                "tsconfig.json",
+			                "tsconfig.build.json",
+			              ],
+			            },
+			          },
+			          "name": "@example/app",
+			          "private": true,
+			        },
+			        "path": "packages/app/package.json",
+			      },
 			      "path": "packages/app",
+			      "tsConfigFiles": [
+			        {
+			          "content": {
+			            "compilerOptions": {
+			              "composite": true,
+			              "paths": {},
+			            },
+			            "references": [],
+			          },
+			          "path": "packages/app/tsconfig.build.json",
+			        },
+			        {
+			          "content": {
+			            "compilerOptions": {
+			              "composite": true,
+			              "paths": {},
+			            },
+			            "references": [],
+			          },
+			          "path": "packages/app/tsconfig.json",
+			        },
+			      ],
 			    },
-			    Dependency {
+			    {
 			      "config": {
-			        "entrypointOutputMode": "module",
+			        "entrypointOutputMode": "esm",
 			        "entrypoints": [
 			          "model/index.ts",
 			          "test/another.ts",
@@ -55,17 +127,48 @@ describe("Project", () => {
 			        },
 			      },
 			      "entrypointList": [
-			        Entrypoint {
+			        {
 			          "directory": "model",
 			          "name": "index",
 			        },
-			        Entrypoint {
+			        {
 			          "directory": "test",
 			          "name": "another",
 			        },
 			      ],
 			      "name": "@example/lib",
+			      "packageJson": {
+			        "content": {
+			          "entrysmith": {
+			            "entrypointOutputMode": "esm",
+			            "entrypoints": [
+			              "model/index.ts",
+			              "test/another.ts",
+			            ],
+			            "packageOutputDirectory": "build",
+			            "typescript": {
+			              "referenceTsConfigPaths": [
+			                "tsconfig.json",
+			              ],
+			              "tsConfigTargetPath": "tsconfig.json",
+			            },
+			          },
+			          "name": "@example/lib",
+			          "private": true,
+			        },
+			        "path": "packages/lib/package.json",
+			      },
 			      "path": "packages/lib",
+			      "tsConfigFiles": [
+			        {
+			          "content": {
+			            "compilerOptions": {
+			              "composite": true,
+			            },
+			          },
+			          "path": "packages/lib/tsconfig.json",
+			        },
+			      ],
 			    },
 			  ],
 			  "path": StringMatching /example-monorepo\\$/,

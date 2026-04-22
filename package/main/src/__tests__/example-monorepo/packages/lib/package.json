@@ -6,7 +6,7 @@
       "model/index.ts",
       "test/another.ts"
     ],
-    "entrypointOutputMode": "module",
+    "entrypointOutputMode": "esm",
     "typescript": {
       "tsConfigTargetPath": "tsconfig.json",
       "referenceTsConfigPaths": [

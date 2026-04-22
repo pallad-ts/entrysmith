@@ -1,7 +1,7 @@
-import { readFile, writeFile } from "node:fs/promises";
-import { PackageJson, PackageJsonExports, readPackageJSON, writePackageJSON } from "pkg-types";
 import { ParseError, parse, printParseErrorCode } from "jsonc-parser";
+import { PackageJson, PackageJsonExports, readPackageJSON, writePackageJSON } from "pkg-types";
 
+import { readFile, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 
 import { Dependency } from "../model/Dependency";
@@ -171,7 +171,6 @@ function applyReferencesToTsConfig(
 		return left.path.localeCompare(right.path);
 	});
 }
-
 function applyPathsToTsConfig(
 	tsConfig: JsonObject,
 	workspaceDependencyList: Dependency[],
