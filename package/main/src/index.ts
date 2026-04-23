@@ -14,9 +14,7 @@ program
 	.command("fix", { isDefault: true })
 	.description("Fix current package configuration")
 	.action(async () => {
-		const result = await apply(process.cwd());
-
-		console.log("done");
+		await apply(process.cwd());
 	});
 
 void program.parseAsync(process.argv).catch(error => {

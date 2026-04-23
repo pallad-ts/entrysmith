@@ -21,13 +21,14 @@ export type DependencyConfig = z.infer<typeof DependencyConfigSchema>;
 
 const CONFIG_NAME = "entrysmith";
 const SEARCH_PLACES = ["package.json", "entrysmith.config.js", "entrysmith.config.ts", "entrysmith.config.json"];
+const TYPESCRIPT_EXTENSION = ".ts";
 
 export async function loadDependencyConfig(packageDirectory: string): Promise<DependencyConfig> {
 	const explorer = cosmiconfig(CONFIG_NAME, {
 		searchPlaces: SEARCH_PLACES,
 		stopDir: packageDirectory,
 		loaders: {
-			".ts": TypeScriptLoader(),
+			[TYPESCRIPT_EXTENSION]: TypeScriptLoader(),
 		},
 	});
 

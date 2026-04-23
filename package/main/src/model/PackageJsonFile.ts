@@ -1,4 +1,6 @@
-import { PackageJson, readPackageJSON, writePackageJSON } from "pkg-types";
+import { PackageJson, writePackageJSON } from "pkg-types";
+
+import { readFile } from "node:fs/promises";
 
 export class PackageJsonFile {
 	constructor(
@@ -43,6 +45,6 @@ export class PackageJsonFile {
 	}
 
 	static async load(path: string): Promise<PackageJsonFile> {
-		return new PackageJsonFile(path, await readPackageJSON(path));
+		return new PackageJsonFile(path, JSON.parse(await readFile(path, "utf8")) as PackageJson);
 	}
 }

@@ -1,0 +1,10 @@
+{
+  "name": "@example/unrelated",
+  "private": true,
+  "entrysmith": {
+    "entrypoints": [
+      "index.ts"
+    ],
+    "entrypointOutputMode": "esm"
+  }
+}

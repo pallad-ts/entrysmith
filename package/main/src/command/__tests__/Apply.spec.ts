@@ -1,9 +1,13 @@
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 
 import { afterEach, beforeEach } from "vitest";
 
+import { PackageJson, TSConfig } from "pkg-types";
+
+import { PackageJsonFile } from "../../model/PackageJsonFile";
+import { TsConfigFile } from "../../model/TsConfigFile";
 import { apply } from "../apply";
 
 const tempDirectoryList: string[] = [];
@@ -29,25 +33,12 @@ describe("apply", () => {
 	it("applies package.json and tsconfig changes for all workspace dependencies", async () => {
 		const libPackagePath = path.resolve(fixturePath, "packages/lib");
 		const appPackagePath = path.resolve(fixturePath, "packages/app");
+		const unrelatedPackagePath = path.resolve(fixturePath, "packages/unrelated");
 
-		await applyAllWorkspacePackages([libPackagePath, appPackagePath]);
+		await applyAllWorkspacePackages([libPackagePath, appPackagePath, unrelatedPackagePath]);
 
-		expect(await readPackageJson(path.resolve(libPackagePath, "package.json"))).toMatchInlineSnapshot(`
+		expect(await readPackageJsonRelevant(path.resolve(libPackagePath, "package.json"))).toMatchInlineSnapshot(`
 			{
-			  "entrysmith": {
-			    "entrypointOutputMode": "esm",
-			    "entrypoints": [
-			      "model/index.ts",
-			      "test/another.ts",
-			    ],
-			    "packageOutputDirectory": "build",
-			    "typescript": {
-			      "referenceTsConfigPaths": [
-			        "tsconfig.json",
-			      ],
-			      "tsConfigTargetPath": "tsconfig.json",
-			    },
-			  },
 			  "exports": {
 			    "./model": {
 			      "import": "./build/model/index.js",
@@ -57,55 +48,30 @@ describe("apply", () => {
 			      "import": "./build/test/another.js",
 			    },
 			  },
-			  "files": [
-			    "build",
-			  ],
-			  "name": "@example/lib",
-			  "private": true,
 			}
 		`);
 
-		expect(await readJsonFile(path.resolve(libPackagePath, "tsconfig.json"))).toMatchInlineSnapshot(`
+		expect(await readTsConfigRelevant(path.resolve(libPackagePath, "tsconfig.json"))).toMatchInlineSnapshot(`
 			{
 			  "compilerOptions": {
 			    "composite": true,
 			  },
+			  "references": undefined,
 			}
 		`);
 
-		expect(await readPackageJson(path.resolve(appPackagePath, "package.json"))).toMatchInlineSnapshot(`
+		expect(await readPackageJsonRelevant(path.resolve(appPackagePath, "package.json"))).toMatchInlineSnapshot(`
 			{
-			  "dependencies": {
-			    "@example/lib": "workspace:*",
-			  },
-			  "entrysmith": {
-			    "entrypointOutputMode": "esm",
-			    "entrypoints": [
-			      "index.ts",
-			    ],
-			    "packageOutputDirectory": "dist",
-			    "typescript": {
-			      "referenceTsConfigPaths": [
-			        "tsconfig.json",
-			        "tsconfig.build.json",
-			      ],
-			    },
-			  },
 			  "exports": {
 			    ".": {
 			      "import": "./dist/index.js",
 			    },
 			    "./package.json": "./package.json",
 			  },
-			  "files": [
-			    "dist",
-			  ],
-			  "name": "@example/app",
-			  "private": true,
 			}
 		`);
 
-		expect(await readJsonFile(path.resolve(appPackagePath, "tsconfig.json"))).toMatchInlineSnapshot(`
+		expect(await readTsConfigRelevant(path.resolve(appPackagePath, "tsconfig.json"))).toMatchInlineSnapshot(`
 			{
 			  "compilerOptions": {
 			    "composite": true,
@@ -126,13 +92,9 @@ describe("apply", () => {
 			}
 		`);
 
-		expect(await readJsonFile(path.resolve(appPackagePath, "tsconfig.build.json"))).toMatchInlineSnapshot(`
+		expect(await readTsConfigRelevant(path.resolve(appPackagePath, "tsconfig.build.json"))).toMatchInlineSnapshot(`
 			{
-			  "exclude": [
-			    "__tests__/**/*.test.ts",
-			    "__tests__/**/*.spec.ts",
-			  ],
-			  "extends": "./tsconfig.json",
+			  "compilerOptions": undefined,
 			  "references": [
 			    {
 			      "path": "../lib/tsconfig.json",
@@ -140,12 +102,32 @@ describe("apply", () => {
 			  ],
 			}
 		`);
+
+		expect(await readPackageJsonRelevant(path.resolve(unrelatedPackagePath, "package.json"))).toMatchInlineSnapshot(`
+			{
+			  "exports": {
+			    ".": {
+			      "import": "./dist/index.js",
+			    },
+			    "./package.json": "./package.json",
+			  },
+			}
+		`);
+
+		expect(await readTsConfigRelevant(path.resolve(unrelatedPackagePath, "tsconfig.json"))).toMatchInlineSnapshot(`
+			{
+			  "compilerOptions": {
+			    "composite": true,
+			  },
+			  "references": undefined,
+			}
+		`);
 	});
 
 	it("applies commonjs root export after copying full workspace directory", async () => {
 		const packagePath = path.resolve(fixturePath, "packages/app");
 		const packageJsonPath = path.resolve(packagePath, "package.json");
-		const packageJson = await readJsonFile(packageJsonPath);
+		const packageJson = (await PackageJsonFile.load(packageJsonPath)).content;
 
 		await writeFile(
 			packageJsonPath,
@@ -165,35 +147,14 @@ describe("apply", () => {
 
 		await apply(packagePath);
 
-		expect(await readPackageJson(packageJsonPath)).toMatchInlineSnapshot(`
+		expect(await readPackageJsonRelevant(packageJsonPath)).toMatchInlineSnapshot(`
 			{
-			  "dependencies": {
-			    "@example/lib": "workspace:*",
-			  },
-			  "entrysmith": {
-			    "entrypointOutputMode": "cjs",
-			    "entrypoints": [
-			      "index.ts",
-			    ],
-			    "packageOutputDirectory": "dist",
-			    "typescript": {
-			      "referenceTsConfigPaths": [
-			        "tsconfig.json",
-			        "tsconfig.build.json",
-			      ],
-			    },
-			  },
 			  "exports": {
 			    ".": {
 			      "default": "./dist/index.js",
 			    },
 			    "./package.json": "./package.json",
 			  },
-			  "files": [
-			    "dist",
-			  ],
-			  "name": "@example/app",
-			  "private": true,
 			}
 		`);
 	});
@@ -201,7 +162,7 @@ describe("apply", () => {
 	it("stores path mappings in parent tsconfig when child extends it", async () => {
 		const packagePath = path.resolve(fixturePath, "packages/app");
 		const packageJsonPath = path.resolve(packagePath, "package.json");
-		const packageJson = await readJsonFile(packageJsonPath);
+		const packageJson = (await PackageJsonFile.load(packageJsonPath)).content;
 		const entrysmith = packageJson.entrysmith as Record<string, unknown>;
 		const typescript = (entrysmith.typescript ?? {}) as Record<string, unknown>;
 
@@ -255,10 +216,10 @@ describe("apply", () => {
 
 		await apply(packagePath);
 
-		const parentTsConfig = await readJsonFile(path.resolve(packagePath, "tsconfig.base.json"));
-		const childTsConfig = await readJsonFile(path.resolve(packagePath, "tsconfig.json"));
+		const parentTsConfig = await readTsConfigFile(path.resolve(packagePath, "tsconfig.base.json"));
+		const childTsConfig = await readTsConfigFile(path.resolve(packagePath, "tsconfig.json"));
 
-		expect(parentTsConfig).toMatchInlineSnapshot(`
+		expect(toRelevantTsConfigFields(parentTsConfig)).toMatchInlineSnapshot(`
 			{
 			  "compilerOptions": {
 			    "composite": true,
@@ -279,9 +240,9 @@ describe("apply", () => {
 			}
 		`);
 
-		expect(childTsConfig).toMatchInlineSnapshot(`
+		expect(toRelevantTsConfigFields(childTsConfig)).toMatchInlineSnapshot(`
 			{
-			  "extends": "./tsconfig.base.json",
+			  "compilerOptions": undefined,
 			  "references": [
 			    {
 			      "path": "../lib/tsconfig.json",
@@ -312,12 +273,27 @@ async function applyAllWorkspacePackages(packagePathList: string[]): Promise<voi
 	}
 }
 
-async function readPackageJson(packageJsonPath: string): Promise<Record<string, unknown>> {
-	const packageJsonContent = await readFile(packageJsonPath, "utf8");
-	return JSON.parse(packageJsonContent) as Record<string, unknown>;
+async function readPackageJsonRelevant(packageJsonPath: string): Promise<Record<string, unknown>> {
+	return toRelevantPackageJsonFields((await PackageJsonFile.load(packageJsonPath)).content);
 }
 
-async function readJsonFile(filePath: string): Promise<Record<string, unknown>> {
-	const content = await readFile(filePath, "utf8");
-	return JSON.parse(content) as Record<string, unknown>;
+async function readTsConfigRelevant(filePath: string): Promise<Record<string, unknown>> {
+	return toRelevantTsConfigFields(await readTsConfigFile(filePath));
+}
+
+function toRelevantPackageJsonFields(packageJson: PackageJson): Record<string, unknown> {
+	return {
+		exports: packageJson.exports,
+	};
+}
+
+function toRelevantTsConfigFields(tsConfig: TSConfig): Record<string, unknown> {
+	return {
+		compilerOptions: tsConfig.compilerOptions,
+		references: tsConfig.references,
+	};
+}
+
+async function readTsConfigFile(filePath: string): Promise<TSConfig> {
+	return (await TsConfigFile.load(filePath)).content as TSConfig;
 }

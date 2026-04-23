@@ -90,11 +90,11 @@ describe("Project", () => {
 			      "tsConfigFiles": [
 			        {
 			          "content": {
-			            "compilerOptions": {
-			              "composite": true,
-			              "paths": {},
-			            },
-			            "references": [],
+			            "exclude": [
+			              "__tests__/**/*.test.ts",
+			              "__tests__/**/*.spec.ts",
+			            ],
+			            "extends": "./tsconfig.json",
 			          },
 			          "path": "packages/app/tsconfig.build.json",
 			        },
@@ -166,6 +166,51 @@ describe("Project", () => {
 			            },
 			          },
 			          "path": "packages/lib/tsconfig.json",
+			        },
+			      ],
+			    },
+			    {
+			      "config": {
+			        "entrypointOutputMode": "esm",
+			        "entrypoints": [
+			          "index.ts",
+			        ],
+			        "packageOutputDirectory": "dist",
+			        "typescript": {
+			          "referenceTsConfigPaths": [
+			            "tsconfig.json",
+			          ],
+			        },
+			      },
+			      "entrypointList": [
+			        {
+			          "directory": undefined,
+			          "name": "index",
+			        },
+			      ],
+			      "name": "@example/unrelated",
+			      "packageJson": {
+			        "content": {
+			          "entrysmith": {
+			            "entrypointOutputMode": "esm",
+			            "entrypoints": [
+			              "index.ts",
+			            ],
+			          },
+			          "name": "@example/unrelated",
+			          "private": true,
+			        },
+			        "path": "packages/unrelated/package.json",
+			      },
+			      "path": "packages/unrelated",
+			      "tsConfigFiles": [
+			        {
+			          "content": {
+			            "compilerOptions": {
+			              "composite": true,
+			            },
+			          },
+			          "path": "packages/unrelated/tsconfig.json",
 			        },
 			      ],
 			    },
