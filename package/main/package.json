@@ -1,6 +1,6 @@
 {
   "name": "@pallad/entrysmith",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "yarn run -TB tsc -p tsconfig.json",
     "test": "yarn run -TB vitest run --passWithNoTests",
-    "lint": "yarn run -TB eslint src/**/*.ts",
+    "lint": "yarn run -TB eslint src/**/*.ts --no-warn-ignored",
     "generate-barrels": "yarn run -TB barrelsby -l replace -L --delete -d ./src"
   },
   "dependencies": {

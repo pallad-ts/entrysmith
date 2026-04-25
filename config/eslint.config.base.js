@@ -1,10 +1,7 @@
 module.exports = [
   ...require("@pallad/eslint-config"),
   {
-    files: ["package/main/src/__tests__/example-monorepo/**/*.ts"],
-    rules: {
-      "@typescript-eslint/no-unnecessary-boolean-literal-compare": ["off"],
-    },
+    ignores: ["package/main/src/__tests__/example-monorepo/**"],
   },
   {
     rules: {

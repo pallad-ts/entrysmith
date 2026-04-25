@@ -3,6 +3,13 @@ import { cosmiconfig } from "cosmiconfig";
 import { TypeScriptLoader } from "cosmiconfig-typescript-loader";
 import { z } from "zod";
 
+const TS_CONFIG_REFERENCE_TARGET_PATH_DESCRIPTION =
+	"Path to tsconfig target used when other workspace packages create TypeScript project references to this package. Defaults to the package root.";
+const REFERENCE_TS_CONFIG_PATHS_DESCRIPTION =
+	"Paths to tsconfig files in this package that receive TypeScript project references. Path mappings are stored in the common extended tsconfig when possible.";
+const PACKAGE_OUTPUT_DIRECTORY_DESCRIPTION =
+	"Directory where built package files are emitted and referenced from package.json exports.";
+
 export const DependencyEntrypointOutputModeSchema = z.enum(["cjs", "esm"]);
 export type DependencyEntrypointOutputMode = z.infer<typeof DependencyEntrypointOutputModeSchema>;
 export const DependencyConfigSchema = z.object({
@@ -10,11 +17,22 @@ export const DependencyConfigSchema = z.object({
 	entrypointOutputMode: DependencyEntrypointOutputModeSchema,
 	typescript: z
 		.object({
-			tsConfigTargetPath: z.string().min(1).optional(),
-			referenceTsConfigPaths: z.array(z.string().min(1)).default(["tsconfig.json"]),
+			tsConfigReferenceTargetPath: z
+				.string()
+				.min(1)
+				.optional()
+				.describe(TS_CONFIG_REFERENCE_TARGET_PATH_DESCRIPTION),
+			referenceTsConfigPaths: z
+				.array(z.string().min(1))
+				.default(["tsconfig.json"])
+				.describe(REFERENCE_TS_CONFIG_PATHS_DESCRIPTION),
 		})
 		.default({}),
-	packageOutputDirectory: z.string().min(1).default("dist"),
+	packageOutputDirectory: z
+		.string()
+		.min(1)
+		.default("dist")
+		.describe(PACKAGE_OUTPUT_DIRECTORY_DESCRIPTION),
 });
 
 export type DependencyConfig = z.infer<typeof DependencyConfigSchema>;

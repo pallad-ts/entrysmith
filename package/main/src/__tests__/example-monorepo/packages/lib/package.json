@@ -8,7 +8,7 @@
     ],
     "entrypointOutputMode": "esm",
     "typescript": {
-      "tsConfigTargetPath": "tsconfig.json",
+      "tsConfigReferenceTargetPath": "tsconfig.json",
       "referenceTsConfigPaths": [
         "tsconfig.json"
       ]

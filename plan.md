@@ -11,9 +11,9 @@ Use zod to define its schema.
 - `entrypoints` - array of filenames pointing in `src` directory
 - `entrypointOutputMode` - `commonjs`, `module`
 - `typescript`
-  - `tsConfigTargetPath` - path to tsconfig within target directory. Optional, no default.
-  - `referenceTsConfigPaths` - array of strings pointing to tsconfig files that should be updated with entrypoints references. By default `tsconfig.json`
-- `packageOutputDirectory` - by default `dist`
+  - `tsConfigReferenceTargetPath` - path to tsconfig target used when other workspace packages create TypeScript project references to this package. Optional; defaults to package root.
+  - `referenceTsConfigPaths` - array of paths to tsconfig files in this package that should receive TypeScript project references for workspace dependencies. By default `tsconfig.json`
+- `packageOutputDirectory` - directory where built package files are emitted and referenced from package.json exports. By default `dist`
 
 ## What is entrypoint
 
@@ -77,11 +77,11 @@ Create entry in `references` for each dependency from workspaces
 ```
 "references": [
   {
-    "path": "../[pathToDependencyPackage](/[tsConfigTargetPath])?"
+    "path": "../[pathToDependencyPackage](/[tsConfigReferenceTargetPath])?"
   }
 ]
 ```
-Note that `tsConfigTargetPath` is optional, if not provided, it will reference package root.
+Note that `tsConfigReferenceTargetPath` is optional, if not provided, it will reference package root.
 
 
 #### Typescript path mapping
@@ -104,4 +104,3 @@ Add `compilerOptions.paths` entry for each entrypoint of the dependency in follo
 ### `fix` (called as well when running `entrysmith` without arguments)
 
 Applies changes to the package. See section "Applying entrypoints" for details.
-

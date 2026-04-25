@@ -38,8 +38,7 @@ describe("Project", () => {
 		}).toMatchInlineSnapshot(
 			{
 				path: expect.stringMatching(/example-monorepo$/),
-			},
-			`
+			}, `
 			{
 			  "dependencyList": [
 			    {
@@ -122,7 +121,7 @@ describe("Project", () => {
 			          "referenceTsConfigPaths": [
 			            "tsconfig.json",
 			          ],
-			          "tsConfigTargetPath": "tsconfig.json",
+			          "tsConfigReferenceTargetPath": "tsconfig.json",
 			        },
 			      },
 			      "entrypointList": [
@@ -149,7 +148,7 @@ describe("Project", () => {
 			              "referenceTsConfigPaths": [
 			                "tsconfig.json",
 			              ],
-			              "tsConfigTargetPath": "tsconfig.json",
+			              "tsConfigReferenceTargetPath": "tsconfig.json",
 			            },
 			          },
 			          "name": "@example/lib",
@@ -217,7 +216,6 @@ describe("Project", () => {
 			  ],
 			  "path": StringMatching /example-monorepo\\$/,
 			}
-		`
-		);
+		`);
 	});
 });

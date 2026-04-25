@@ -54,8 +54,8 @@ export class Dependency {
 
 async function loadDependencyTsConfigFiles(packagePath: string, config: DependencyConfig): Promise<TsConfigFile[]> {
 	const tsConfigPathSet = new Set(config.typescript.referenceTsConfigPaths);
-	if (config.typescript.tsConfigTargetPath) {
-		tsConfigPathSet.add(config.typescript.tsConfigTargetPath);
+	if (config.typescript.tsConfigReferenceTargetPath) {
+		tsConfigPathSet.add(config.typescript.tsConfigReferenceTargetPath);
 	}
 
 	return Promise.all(

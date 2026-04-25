@@ -1,9 +1,6 @@
 module.exports = [
-	...require("../../eslint.config"),
+	...require("../../config/eslint.config.base"),
 	{
-		files: ["src/__tests__/example-monorepo/**/*.ts"],
-		rules: {
-			"@typescript-eslint/no-unnecessary-boolean-literal-compare": ["off"],
-		},
+		ignores: ["src/__tests__/example-monorepo/**"],
 	},
 ];

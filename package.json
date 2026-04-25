@@ -1,6 +1,6 @@
 {
   "name": "@pallad/entrysmith-monorepo",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "packageManager": "yarn@4.14.1",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
     "package/*"
   ],
   "author": "",
+  "private": true,
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/pallad-ts/entrysmith/issues"

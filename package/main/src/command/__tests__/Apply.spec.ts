@@ -56,7 +56,6 @@ describe("apply", () => {
 			  "compilerOptions": {
 			    "composite": true,
 			  },
-			  "references": undefined,
 			}
 		`);
 
@@ -94,7 +93,6 @@ describe("apply", () => {
 
 		expect(await readTsConfigRelevant(path.resolve(appPackagePath, "tsconfig.build.json"))).toMatchInlineSnapshot(`
 			{
-			  "compilerOptions": undefined,
 			  "references": [
 			    {
 			      "path": "../lib/tsconfig.json",
@@ -119,7 +117,6 @@ describe("apply", () => {
 			  "compilerOptions": {
 			    "composite": true,
 			  },
-			  "references": undefined,
 			}
 		`);
 	});
@@ -242,7 +239,6 @@ describe("apply", () => {
 
 		expect(toRelevantTsConfigFields(childTsConfig)).toMatchInlineSnapshot(`
 			{
-			  "compilerOptions": undefined,
 			  "references": [
 			    {
 			      "path": "../lib/tsconfig.json",
@@ -288,10 +284,18 @@ function toRelevantPackageJsonFields(packageJson: PackageJson): Record<string, u
 }
 
 function toRelevantTsConfigFields(tsConfig: TSConfig): Record<string, unknown> {
-	return {
+	return omitUndefinedFields({
 		compilerOptions: tsConfig.compilerOptions,
 		references: tsConfig.references,
-	};
+	});
+}
+
+function omitUndefinedFields(fields: Record<string, unknown>): Record<string, unknown> {
+	return Object.fromEntries(
+		Object.entries(fields).filter(([, value]) => {
+			return value !== undefined;
+		})
+	);
 }
 
 async function readTsConfigFile(filePath: string): Promise<TSConfig> {
