@@ -63,7 +63,7 @@ describe("apply", () => {
 			  },
 			  "references": [
 			    {
-			      "path": "../multiple-tsconfigs",
+			      "path": "../multiple-tsconfigs/tsconfig.build.json",
 			    },
 			  ],
 			}
