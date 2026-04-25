@@ -1,6 +1,9 @@
 {
   "name": "@example/lib",
   "private": true,
+  "dependencies": {
+    "@example/multiple-tsconfigs": "workspace:*"
+  },
   "entrysmith": {
     "entrypoints": [
       "model/index.ts",

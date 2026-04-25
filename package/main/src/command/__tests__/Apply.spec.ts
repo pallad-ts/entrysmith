@@ -55,7 +55,17 @@ describe("apply", () => {
 			{
 			  "compilerOptions": {
 			    "composite": true,
+			    "paths": {
+			      "@example/multiple-tsconfigs": [
+			        "../multiple-tsconfigs/src/index",
+			      ],
+			    },
 			  },
+			  "references": [
+			    {
+			      "path": "../multiple-tsconfigs",
+			    },
+			  ],
 			}
 		`);
 
@@ -85,7 +95,7 @@ describe("apply", () => {
 			  },
 			  "references": [
 			    {
-			      "path": "../lib/tsconfig.json",
+			      "path": "../lib",
 			    },
 			  ],
 			}
@@ -95,7 +105,7 @@ describe("apply", () => {
 			{
 			  "references": [
 			    {
-			      "path": "../lib/tsconfig.json",
+			      "path": "../lib",
 			    },
 			  ],
 			}
@@ -231,7 +241,7 @@ describe("apply", () => {
 			  },
 			  "references": [
 			    {
-			      "path": "../lib/tsconfig.json",
+			      "path": "../lib",
 			    },
 			  ],
 			}
@@ -241,7 +251,7 @@ describe("apply", () => {
 			{
 			  "references": [
 			    {
-			      "path": "../lib/tsconfig.json",
+			      "path": "../lib",
 			    },
 			  ],
 			}

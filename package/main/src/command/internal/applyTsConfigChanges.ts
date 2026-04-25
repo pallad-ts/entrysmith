@@ -66,7 +66,9 @@ function applyReferencesToTsConfig(
 	}
 
 	for (const workspaceDependency of workspaceDependencyList) {
-		const referenceTargetPath = workspaceDependency.config.typescript.tsConfigReferenceTargetPath ?? ".";
+		const referenceTargetPath = omitTsConfigJsonFilename(
+			workspaceDependency.config.typescript.tsConfigReferenceTargetPath ?? "."
+		);
 		const absoluteReferenceTargetPath = path.resolve(projectPath, workspaceDependency.path, referenceTargetPath);
 		const relativeReferenceTargetPath = normalizePath(path.relative(path.dirname(absTsConfigPath), absoluteReferenceTargetPath));
 
@@ -82,6 +84,14 @@ function applyReferencesToTsConfig(
 	tsConfig.references = [...nextReferenceList.values()].sort((left, right) => {
 		return left.path.localeCompare(right.path);
 	});
+}
+
+function omitTsConfigJsonFilename(referenceTargetPath: string): string {
+	if (path.posix.basename(referenceTargetPath) !== "tsconfig.json") {
+		return referenceTargetPath;
+	}
+
+	return path.posix.dirname(referenceTargetPath);
 }
 
 function applyPathsToTsConfig(
