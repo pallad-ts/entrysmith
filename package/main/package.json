@@ -9,10 +9,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "yarn run -TB tsc -p tsconfig.json",
+    "build": "yarn run build:clean && yarn run -TB tsc --build tsconfig.build.json",
+    "build:clean": "yarn run -TB tsc --build --clean tsconfig.build.json",
     "test": "yarn run -TB vitest run --passWithNoTests",
-    "lint": "yarn run -TB eslint src/**/*.ts --no-warn-ignored",
-    "generate-barrels": "yarn run -TB barrelsby -l replace -L --delete -d ./src"
+    "lint": "yarn run -TB eslint src/**/*.ts --no-warn-ignored"
   },
   "dependencies": {
     "@manypkg/get-packages": "^3.1.0",
