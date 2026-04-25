@@ -15,6 +15,7 @@
   "scripts": {
     "build": "yarn run build:clean && yarn run -TB tsc --build tsconfig.build.json",
     "build:clean": "yarn run -TB tsc --build --clean tsconfig.build.json",
+    "prepublish": "yarn run build",
     "test": "yarn run -TB vitest run --passWithNoTests",
     "lint": "yarn run -TB eslint src/**/*.ts --no-warn-ignored"
   },
