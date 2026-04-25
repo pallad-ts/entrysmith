@@ -1,10 +1,14 @@
 {
   "name": "@pallad/entrysmith",
   "version": "0.1.0",
-  "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pallad-ts/entrysmith.git",
+    "directory": "package/main"
+  },
   "files": [
     "dist"
   ],
