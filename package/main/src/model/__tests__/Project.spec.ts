@@ -175,11 +175,7 @@ describe("Project", () => {
 			          "index.ts",
 			        ],
 			        "packageOutputDirectory": "dist",
-			        "typescript": {
-			          "referenceTsConfigPaths": [
-			            "tsconfig.json",
-			          ],
-			        },
+			        "typescript": {},
 			      },
 			      "entrypointList": [
 			        {
@@ -202,16 +198,7 @@ describe("Project", () => {
 			        "path": "packages/unrelated/package.json",
 			      },
 			      "path": "packages/unrelated",
-			      "tsConfigFiles": [
-			        {
-			          "content": {
-			            "compilerOptions": {
-			              "composite": true,
-			            },
-			          },
-			          "path": "packages/unrelated/tsconfig.json",
-			        },
-			      ],
+			      "tsConfigFiles": [],
 			    },
 			  ],
 			  "path": StringMatching /example-monorepo\\$/,

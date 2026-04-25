@@ -23,7 +23,7 @@
     "cosmiconfig-typescript-loader": "^6.1.0",
     "jsonc-parser": "^3.3.1",
     "pkg-types": "^2.3.0",
-    "zod": "^3.23.8"
+    "zod": "^4"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
