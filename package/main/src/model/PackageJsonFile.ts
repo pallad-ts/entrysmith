@@ -1,6 +1,6 @@
-import { PackageJson, writePackageJSON } from "pkg-types";
+import { PackageJson, readPackageJSON, writePackageJSON } from "pkg-types";
 
-import { readFile } from "node:fs/promises";
+import { normalizePath } from "../util/normalizePath";
 
 export class PackageJsonFile {
 	constructor(
@@ -45,6 +45,12 @@ export class PackageJsonFile {
 	}
 
 	static async load(path: string): Promise<PackageJsonFile> {
-		return new PackageJsonFile(path, JSON.parse(await readFile(path, "utf8")) as PackageJson);
+		const normalizedPath = normalizePath(path);
+		return new PackageJsonFile(
+			path,
+			(await readPackageJSON(path, {
+				test: filePath => normalizePath(filePath) === normalizedPath,
+			})) as PackageJson
+		);
 	}
 }
