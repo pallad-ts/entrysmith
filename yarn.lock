@@ -222,7 +222,7 @@
   version "2.2.0"
 
 "@pallad/entrysmith@file:/Users/wookieb/projects/pallad/entrysmith/package/main":
-  version "0.2.2"
+  version "0.2.3"
   resolved "file:package/main"
   dependencies:
     "@manypkg/get-packages" "^3.1.0"
