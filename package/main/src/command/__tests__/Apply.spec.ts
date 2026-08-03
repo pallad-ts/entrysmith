@@ -42,10 +42,12 @@ describe("apply", () => {
 			  "exports": {
 			    "./model": {
 			      "import": "./build/model/index.js",
+			      "types": "./build/model/index.d.ts",
 			    },
 			    "./package.json": "./package.json",
 			    "./test/another": {
 			      "import": "./build/test/another.js",
+			      "types": "./build/test/another.d.ts",
 			    },
 			  },
 			}
@@ -74,6 +76,7 @@ describe("apply", () => {
 			  "exports": {
 			    ".": {
 			      "import": "./dist/index.js",
+			      "types": "./dist/index.d.ts",
 			    },
 			    "./package.json": "./package.json",
 			  },
@@ -116,6 +119,7 @@ describe("apply", () => {
 			  "exports": {
 			    ".": {
 			      "import": "./dist/index.js",
+			      "types": "./dist/index.d.ts",
 			    },
 			    "./package.json": "./package.json",
 			  },
@@ -158,7 +162,45 @@ describe("apply", () => {
 			{
 			  "exports": {
 			    ".": {
-			      "default": "./dist/index.js",
+			      "require": "./dist/index.js",
+			      "types": "./dist/index.d.ts",
+			    },
+			    "./package.json": "./package.json",
+			  },
+			}
+		`);
+	});
+
+	it("applies exports for all configured output modes", async () => {
+		const packagePath = path.resolve(fixturePath, "packages/app");
+		const packageJsonPath = path.resolve(packagePath, "package.json");
+		const packageJson = (await PackageJsonFile.load(packageJsonPath)).content;
+
+		await writeFile(
+			packageJsonPath,
+			`${JSON.stringify(
+				{
+					...packageJson,
+					entrysmith: {
+						...(packageJson.entrysmith as Record<string, unknown>),
+						entrypointOutputMode: ["cjs", "esm"],
+					},
+				},
+				null,
+				2
+			)}\n`,
+			"utf8"
+		);
+
+		await apply(packagePath);
+
+		expect(await readPackageJsonRelevant(packageJsonPath)).toMatchInlineSnapshot(`
+			{
+			  "exports": {
+			    ".": {
+			      "import": "./dist/index.js",
+			      "require": "./dist/index.js",
+			      "types": "./dist/index.d.ts",
 			    },
 			    "./package.json": "./package.json",
 			  },

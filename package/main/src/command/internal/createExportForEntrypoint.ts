@@ -4,16 +4,23 @@ import { Entrypoint } from "../../model/Entrypoint";
 export function createExportForEntrypoint(
 	entrypoint: Entrypoint,
 	destinationDirectory: string,
-	outputMode: DependencyEntrypointOutputMode
-): [key: string, value: { import: string } | { default: string }] {
+	outputModeList: DependencyEntrypointOutputMode[]
+): [key: string, value: Record<"types", string> & Partial<Record<"import" | "require", string>>] {
 	const key = toPackageExportKey(entrypoint);
-	const path = `./${entrypoint.destinationPath(destinationDirectory)}`;
+	const outputPath = `./${entrypoint.destinationPath(destinationDirectory)}`;
+	const value: Record<"types", string> & Partial<Record<"import" | "require", string>> = {
+		types: outputPath.replace(/\.js$/, ".d.ts"),
+	};
 
-	if (outputMode === "cjs") {
-		return [key, { default: path }];
+	if (outputModeList.includes("esm")) {
+		value.import = outputPath;
 	}
 
-	return [key, { import: path }];
+	if (outputModeList.includes("cjs")) {
+		value.require = outputPath;
+	}
+
+	return [key, value];
 }
 
 function toPackageExportKey(entrypoint: Entrypoint): string {

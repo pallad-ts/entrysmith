@@ -13,7 +13,12 @@ export const DependencyEntrypointOutputModeSchema = z.enum(["cjs", "esm"]);
 export type DependencyEntrypointOutputMode = z.infer<typeof DependencyEntrypointOutputModeSchema>;
 export const DependencyConfigSchema = z.object({
 	entrypoints: z.array(z.string().min(1, "Entrypoint path cannot be empty")),
-	entrypointOutputMode: DependencyEntrypointOutputModeSchema.default("esm"),
+	entrypointOutputMode: z
+		.union([DependencyEntrypointOutputModeSchema, DependencyEntrypointOutputModeSchema.array().nonempty()])
+		.transform(x => {
+			return Array.isArray(x) ? x : [x];
+		})
+		.default(["cjs", "esm"]),
 	typescript: z
 		.object({
 			tsConfigReferenceTargetPath: z.string().min(1).default("tsconfig.json").describe(TS_CONFIG_REFERENCE_TARGET_PATH_DESCRIPTION),

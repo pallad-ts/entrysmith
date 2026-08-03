@@ -55,7 +55,7 @@ Entrysmith loads configuration from one of:
 Configuration fields:
 
 - `entrypoints`: list of entrypoint files under `src`
-- `entrypointOutputMode`: `"esm"` or `"cjs"`
+- `entrypointOutputMode`: `"esm"`, `"cjs"`, or a non-empty list of both; defaults to `["cjs", "esm"]`
 - `packageOutputDirectory`: build output directory used in package exports, defaults to `"dist"`
 - `typescript.tsConfigReferenceTargetPath`: target path used when other workspace packages reference this package, defaults to the package root
 - `typescript.referenceTsConfigPaths`: tsconfig files that receive references and path mappings, defaults to `["tsconfig.json"]`
@@ -87,9 +87,11 @@ For `entrypointOutputMode: "esm"`, Entrysmith writes exports like:
 {
   "exports": {
     "./model": {
+      "types": "./dist/model/index.d.ts",
       "import": "./dist/model/index.js"
     },
     "./test/another": {
+      "types": "./dist/test/another.d.ts",
       "import": "./dist/test/another.js"
     },
     "./package.json": "./package.json"
@@ -97,7 +99,7 @@ For `entrypointOutputMode: "esm"`, Entrysmith writes exports like:
 }
 ```
 
-For `entrypointOutputMode: "cjs"`, Entrysmith uses `default` instead of `import`.
+For `entrypointOutputMode: "cjs"`, Entrysmith uses `require` instead of `import`. When both modes are configured, each export includes `types`, `import`, and `require` conditions.
 
 ## TypeScript Workspace Support
 

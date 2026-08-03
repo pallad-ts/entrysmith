@@ -43,7 +43,9 @@ describe("Project", () => {
 			  "dependencyList": [
 			    {
 			      "config": {
-			        "entrypointOutputMode": "esm",
+			        "entrypointOutputMode": [
+			          "esm",
+			        ],
 			        "entrypoints": [
 			          "index.ts",
 			        ],
@@ -112,7 +114,9 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
-			        "entrypointOutputMode": "esm",
+			        "entrypointOutputMode": [
+			          "esm",
+			        ],
 			        "entrypoints": [
 			          "model/index.ts",
 			          "test/another.ts",
@@ -174,7 +178,9 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
-			        "entrypointOutputMode": "esm",
+			        "entrypointOutputMode": [
+			          "esm",
+			        ],
 			        "entrypoints": [
 			          "index.ts",
 			        ],
@@ -184,7 +190,7 @@ describe("Project", () => {
 			            "tsconfig.json",
 			            "tsconfig.build.json",
 			          ],
-			          "tsConfigReferenceTargetPath": "tsconfig.json",
+			          "tsConfigReferenceTargetPath": "tsconfig.build.json",
 			        },
 			      },
 			      "entrypointList": [
@@ -210,6 +216,7 @@ describe("Project", () => {
 			                "tsconfig.json",
 			                "tsconfig.build.json",
 			              ],
+			              "tsConfigReferenceTargetPath": "tsconfig.build.json",
 			            },
 			          },
 			          "name": "@example/multiple-tsconfigs",
@@ -243,7 +250,9 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
-			        "entrypointOutputMode": "esm",
+			        "entrypointOutputMode": [
+			          "esm",
+			        ],
 			        "entrypoints": [
 			          "index.ts",
 			        ],
