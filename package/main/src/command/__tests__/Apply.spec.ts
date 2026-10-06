@@ -180,6 +180,53 @@ describe("apply", () => {
 		});
 	});
 
+	it("uses package-manager workspaces when root Entrysmith workspace configuration is absent", async () => {
+		const libPackageJsonPath = path.resolve(fixturePath, "packages/lib/package.json");
+		const libPackageJson = (await PackageJsonFile.load(libPackageJsonPath)).content;
+		await writeFile(
+			libPackageJsonPath,
+			`${JSON.stringify(
+				{
+					...libPackageJson,
+					dependencies: undefined,
+				},
+				null,
+				2
+			)}\n`,
+			"utf8"
+		);
+
+		const result = await apply(fixturePath);
+
+		expect(result.packageCount).toBe(4);
+		const appPackageJson = await readPackageJsonRelevant(path.resolve(fixturePath, "packages/app/package.json"));
+		expect((appPackageJson.exports as Record<string, unknown>)["."]).toMatchObject({ import: "./dist/index.js" });
+	});
+
+	it("uses Entrysmith workspace configuration instead of package-manager workspaces", async () => {
+		const rootPackageJsonPath = path.resolve(fixturePath, "package.json");
+		const rootPackageJson = (await PackageJsonFile.load(rootPackageJsonPath)).content;
+		await writeFile(
+			rootPackageJsonPath,
+			`${JSON.stringify(
+				{
+					...rootPackageJson,
+					entrysmith: {
+						workspaces: ["packages/app"],
+					},
+				},
+				null,
+				2
+			)}\n`,
+			"utf8"
+		);
+
+		const result = await apply(fixturePath);
+
+		expect(result.packageCount).toBe(1);
+		expect(await readPackageJsonRelevant(path.resolve(fixturePath, "packages/lib/package.json"))).toEqual({ exports: undefined });
+	});
+
 	it("applies commonjs root export after copying full workspace directory", async () => {
 		const packagePath = path.resolve(fixturePath, "packages/app");
 		const packageJsonPath = path.resolve(packagePath, "package.json");

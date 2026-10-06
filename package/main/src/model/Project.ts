@@ -26,6 +26,21 @@ export class Project {
 		return new Project(packageCollection.rootDir, dependencyList);
 	}
 
+	static async loadFromPackageManagerWorkspace(workspaceRootPath: string): Promise<Project | undefined> {
+		const packageCollection = await getPackages(workspaceRootPath);
+		const absoluteWorkspaceRootPath = path.resolve(workspaceRootPath);
+		if (path.resolve(packageCollection.rootDir) !== absoluteWorkspaceRootPath || packageCollection.packages.length === 0) {
+			return undefined;
+		}
+
+		const dependencyList = await loadDependencies(packageCollection.rootDir, packageCollection.packages);
+		if (dependencyList.length === 0) {
+			throw new Error(`Unable to find configured workspace packages in ${absoluteWorkspaceRootPath}`);
+		}
+
+		return new Project(absoluteWorkspaceRootPath, orderWorkspaceDependencies(dependencyList));
+	}
+
 	static async loadFromWorkspaceConfig(rootPath: string, workspaceConfig: WorkspaceConfig): Promise<Project> {
 		const absoluteRootPath = path.resolve(rootPath);
 		const packagePathList = await findWorkspacePackagePaths(absoluteRootPath, workspaceConfig);

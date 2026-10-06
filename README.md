@@ -95,7 +95,7 @@ Configure Entrysmith workspaces at the workspace root:
 
 Run `entrysmith fix` at this root to update every configured package. Entrysmith loads and validates every configured package before it writes files. It applies packages in dependency-first order. Dependencies in `dependencies`, `devDependencies`, `peerDependencies`, and `optionalDependencies` set this order. Dependency cycles and duplicate package names fail the command.
 
-Workspace configuration does not use package-manager `workspaces`. Entrysmith does not run package scripts or compile TypeScript.
+When root Entrysmith workspace configuration is absent, Entrysmith uses package-manager `workspaces`. Set `entrysmith.workspaces` to apply a narrower package set. Entrysmith does not run package scripts or compile TypeScript.
 
 ## Package Exports
 
@@ -138,7 +138,7 @@ Run from a configured package directory:
 entrysmith fix
 ```
 
-Run from a workspace root with `entrysmith.workspaces` to update each configured package:
+Run from a package-manager workspace root to update each configured package. Add `entrysmith.workspaces` only when you need a narrower package set:
 
 ```sh
 entrysmith fix

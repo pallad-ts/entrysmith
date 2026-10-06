@@ -17,16 +17,25 @@ export async function apply(packagePath: string): Promise<ApplyResult> {
 	const workspaceConfig = await loadWorkspaceConfig(absolutePackagePath);
 	if (workspaceConfig) {
 		const project = await Project.loadFromWorkspaceConfig(absolutePackagePath, workspaceConfig);
-		return {
-			changedFilePathList: await applyDependencies(project.dependencyList, project),
-			packageCount: project.dependencyList.length,
-		};
+		return applyProject(project);
+	}
+
+	const packageManagerWorkspace = await Project.loadFromPackageManagerWorkspace(absolutePackagePath);
+	if (packageManagerWorkspace) {
+		return applyProject(packageManagerWorkspace);
 	}
 
 	const { dependency, project } = await loadProjectAndDependency(absolutePackagePath);
 	return {
 		changedFilePathList: await applyDependencies([dependency], project),
 		packageCount: 1,
+	};
+}
+
+async function applyProject(project: Project): Promise<ApplyResult> {
+	return {
+		changedFilePathList: await applyDependencies(project.dependencyList, project),
+		packageCount: project.dependencyList.length,
 	};
 }
 
