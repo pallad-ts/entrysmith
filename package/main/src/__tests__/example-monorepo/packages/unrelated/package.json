@@ -5,6 +5,9 @@
     "entrypoints": [
       "index.ts"
     ],
-    "entrypointOutputMode": "esm"
+    "exportConditions": [
+      "types",
+      "import"
+    ]
   }
 }

@@ -9,7 +9,10 @@
       "model/index.ts",
       "test/another.ts"
     ],
-    "entrypointOutputMode": "esm",
+    "exportConditions": [
+      "types",
+      "import"
+    ],
     "typescript": {
       "tsConfigReferenceTargetPath": "tsconfig.json",
       "referenceTsConfigPaths": [

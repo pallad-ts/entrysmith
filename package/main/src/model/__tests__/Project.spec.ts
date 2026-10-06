@@ -43,11 +43,12 @@ describe("Project", () => {
 			  "dependencyList": [
 			    {
 			      "config": {
-			        "entrypointOutputMode": [
-			          "esm",
-			        ],
 			        "entrypoints": [
 			          "index.ts",
+			        ],
+			        "exportConditions": [
+			          "types",
+			          "import",
 			        ],
 			        "packageOutputDirectory": "dist",
 			        "typescript": {
@@ -71,9 +72,12 @@ describe("Project", () => {
 			            "@example/lib": "workspace:*",
 			          },
 			          "entrysmith": {
-			            "entrypointOutputMode": "esm",
 			            "entrypoints": [
 			              "index.ts",
+			            ],
+			            "exportConditions": [
+			              "types",
+			              "import",
 			            ],
 			            "packageOutputDirectory": "dist",
 			            "typescript": {
@@ -114,12 +118,13 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
-			        "entrypointOutputMode": [
-			          "esm",
-			        ],
 			        "entrypoints": [
 			          "model/index.ts",
 			          "test/another.ts",
+			        ],
+			        "exportConditions": [
+			          "types",
+			          "import",
 			        ],
 			        "packageOutputDirectory": "build",
 			        "typescript": {
@@ -146,10 +151,13 @@ describe("Project", () => {
 			            "@example/multiple-tsconfigs": "workspace:*",
 			          },
 			          "entrysmith": {
-			            "entrypointOutputMode": "esm",
 			            "entrypoints": [
 			              "model/index.ts",
 			              "test/another.ts",
+			            ],
+			            "exportConditions": [
+			              "types",
+			              "import",
 			            ],
 			            "packageOutputDirectory": "build",
 			            "typescript": {
@@ -178,11 +186,12 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
-			        "entrypointOutputMode": [
-			          "esm",
-			        ],
 			        "entrypoints": [
 			          "index.ts",
+			        ],
+			        "exportConditions": [
+			          "types",
+			          "import",
 			        ],
 			        "packageOutputDirectory": "dist",
 			        "typescript": {
@@ -206,9 +215,12 @@ describe("Project", () => {
 			            "@example/lib": "workspace:*",
 			          },
 			          "entrysmith": {
-			            "entrypointOutputMode": "esm",
 			            "entrypoints": [
 			              "index.ts",
+			            ],
+			            "exportConditions": [
+			              "types",
+			              "import",
 			            ],
 			            "packageOutputDirectory": "dist",
 			            "typescript": {
@@ -250,11 +262,12 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
-			        "entrypointOutputMode": [
-			          "esm",
-			        ],
 			        "entrypoints": [
 			          "index.ts",
+			        ],
+			        "exportConditions": [
+			          "types",
+			          "import",
 			        ],
 			        "packageOutputDirectory": "dist",
 			        "typescript": {
@@ -274,9 +287,12 @@ describe("Project", () => {
 			      "packageJson": {
 			        "content": {
 			          "entrysmith": {
-			            "entrypointOutputMode": "esm",
 			            "entrypoints": [
 			              "index.ts",
+			            ],
+			            "exportConditions": [
+			              "types",
+			              "import",
 			            ],
 			          },
 			          "name": "@example/unrelated",

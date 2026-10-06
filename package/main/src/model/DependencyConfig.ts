@@ -8,16 +8,18 @@ const REFERENCE_TS_CONFIG_PATHS_DESCRIPTION =
 	"Paths to tsconfig files in this package that receive TypeScript project references. Path mappings are stored in the common extended tsconfig when possible.";
 const PACKAGE_OUTPUT_DIRECTORY_DESCRIPTION = "Directory where built package files are emitted and referenced from package.json exports.";
 
-export const DependencyEntrypointOutputModeSchema = z.enum(["cjs", "esm"]);
-export type DependencyEntrypointOutputMode = z.infer<typeof DependencyEntrypointOutputModeSchema>;
+export const DependencyExportConditionSchema = z.enum(["types", "import", "require", "default"]);
+export type DependencyExportCondition = z.infer<typeof DependencyExportConditionSchema>;
 export const DependencyConfigSchema = z.object({
 	entrypoints: z.array(z.string().min(1, "Entrypoint path cannot be empty")),
-	entrypointOutputMode: z
-		.union([DependencyEntrypointOutputModeSchema, DependencyEntrypointOutputModeSchema.array().nonempty()])
-		.transform(x => {
-			return Array.isArray(x) ? x : [x];
-		})
-		.default(["cjs", "esm"]),
+	exportConditions: DependencyExportConditionSchema.array()
+		.nonempty("At least one export condition is required")
+		.refine(conditionList => {
+			return conditionList.some(condition => condition !== "types");
+		}, "At least one runtime export condition is required")
+		.refine(conditionList => {
+			return new Set(conditionList).size === conditionList.length;
+		}, "Export conditions cannot repeat"),
 	typescript: z
 		.object({
 			tsConfigReferenceTargetPath: z.string().min(1).default("tsconfig.json").describe(TS_CONFIG_REFERENCE_TARGET_PATH_DESCRIPTION),

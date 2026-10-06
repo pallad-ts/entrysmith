@@ -1,7 +1,7 @@
 import { PackageJson, TSConfig } from "pkg-types";
 import { afterEach, beforeEach } from "vitest";
 
-import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 
@@ -227,7 +227,7 @@ describe("apply", () => {
 		expect(await readPackageJsonRelevant(path.resolve(fixturePath, "packages/lib/package.json"))).toEqual({ exports: undefined });
 	});
 
-	it("applies commonjs root export after copying full workspace directory", async () => {
+	it("applies default export conditions after copying full workspace directory", async () => {
 		const packagePath = path.resolve(fixturePath, "packages/app");
 		const packageJsonPath = path.resolve(packagePath, "package.json");
 		const packageJson = (await PackageJsonFile.load(packageJsonPath)).content;
@@ -239,7 +239,7 @@ describe("apply", () => {
 					...packageJson,
 					entrysmith: {
 						...(packageJson.entrysmith as Record<string, unknown>),
-						entrypointOutputMode: "cjs",
+						exportConditions: ["types", "default"],
 					},
 				},
 				null,
@@ -254,13 +254,18 @@ describe("apply", () => {
 			{
 			  "exports": {
 			    ".": {
-			      "require": "./dist/index.js",
+			      "default": "./dist/index.js",
 			      "types": "./dist/index.d.ts",
 			    },
 			    "./package.json": "./package.json",
 			  },
 			}
 		`);
+		const packageJsonContent = await readFile(packageJsonPath, "utf8");
+		const exportsStartIndex = packageJsonContent.indexOf('"exports"');
+		expect(packageJsonContent.indexOf('"types"', exportsStartIndex)).toBeLessThan(
+			packageJsonContent.indexOf('"default"', exportsStartIndex)
+		);
 	});
 
 	it("reports changed files and reports no changes on a repeated apply", async () => {
@@ -288,7 +293,7 @@ describe("apply", () => {
 		expect(formatApplySummary({ changedFilePathList: [], packageCount: 3 })).toBe("Entrysmith is up to date.");
 	});
 
-	it("applies exports for all configured output modes", async () => {
+	it("applies all configured export conditions", async () => {
 		const packagePath = path.resolve(fixturePath, "packages/app");
 		const packageJsonPath = path.resolve(packagePath, "package.json");
 		const packageJson = (await PackageJsonFile.load(packageJsonPath)).content;
@@ -300,7 +305,7 @@ describe("apply", () => {
 					...packageJson,
 					entrysmith: {
 						...(packageJson.entrysmith as Record<string, unknown>),
-						entrypointOutputMode: ["cjs", "esm"],
+						exportConditions: ["types", "import", "require"],
 					},
 				},
 				null,

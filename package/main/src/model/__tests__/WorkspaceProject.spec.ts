@@ -96,6 +96,7 @@ async function writePackage(
 			...dependencyFields,
 			entrysmith: {
 				entrypoints: ["index.ts"],
+				exportConditions: ["types", "import"],
 			},
 		})
 	);

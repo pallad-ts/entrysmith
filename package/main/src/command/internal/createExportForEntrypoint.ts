@@ -1,23 +1,20 @@
-import { DependencyEntrypointOutputMode } from "../../model/DependencyConfig";
+import { DependencyExportCondition } from "../../model/DependencyConfig";
 import { Entrypoint } from "../../model/Entrypoint";
+
+const EXPORT_CONDITION_ORDER: DependencyExportCondition[] = ["types", "import", "require", "default"];
 
 export function createExportForEntrypoint(
 	entrypoint: Entrypoint,
 	destinationDirectory: string,
-	outputModeList: DependencyEntrypointOutputMode[]
-): [key: string, value: Record<"types", string> & Partial<Record<"import" | "require", string>>] {
+	exportConditions: DependencyExportCondition[]
+): [key: string, value: Partial<Record<DependencyExportCondition, string>>] {
 	const key = toPackageExportKey(entrypoint);
 	const outputPath = `./${entrypoint.destinationPath(destinationDirectory)}`;
-	const value: Record<"types", string> & Partial<Record<"import" | "require", string>> = {
-		types: outputPath.replace(/\.js$/, ".d.ts"),
-	};
-
-	if (outputModeList.includes("esm")) {
-		value.import = outputPath;
-	}
-
-	if (outputModeList.includes("cjs")) {
-		value.require = outputPath;
+	const value: Partial<Record<DependencyExportCondition, string>> = {};
+	for (const condition of EXPORT_CONDITION_ORDER) {
+		if (exportConditions.includes(condition)) {
+			value[condition] = condition === "types" ? outputPath.replace(/\.js$/, ".d.ts") : outputPath;
+		}
 	}
 
 	return [key, value];

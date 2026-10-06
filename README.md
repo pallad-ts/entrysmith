@@ -28,7 +28,7 @@ Entrypoints are files in the package `src` directory. Each entrypoint becomes an
       "test/index.ts",
       "test/another.ts"
     ],
-    "entrypointOutputMode": "esm"
+    "exportConditions": ["types", "import"]
   }
 }
 ```
@@ -55,7 +55,7 @@ Entrysmith loads configuration from one of:
 Configuration fields:
 
 - `entrypoints`: list of entrypoint files under `src`
-- `entrypointOutputMode`: `"esm"`, `"cjs"`, or a non-empty list of both; defaults to `["cjs", "esm"]`
+- `exportConditions`: non-empty list of package export conditions. Use `"types"`, `"import"`, `"require"`, or `"default"`. At least one runtime condition (`"import"`, `"require"`, or `"default"`) is required.
 - `packageOutputDirectory`: build output directory used in package exports, defaults to `"dist"`
 - `typescript.tsConfigReferenceTargetPath`: target path used when other workspace packages reference this package, defaults to the package root
 - `typescript.referenceTsConfigPaths`: tsconfig files that receive references and path mappings, defaults to `["tsconfig.json"]`
@@ -69,12 +69,25 @@ Example:
       "model/index.ts",
       "test/another.ts"
     ],
-    "entrypointOutputMode": "esm",
+    "exportConditions": ["types", "import"],
     "packageOutputDirectory": "dist",
     "typescript": {
       "tsConfigReferenceTargetPath": "tsconfig.json",
       "referenceTsConfigPaths": ["tsconfig.json"]
     }
+  }
+}
+```
+
+### Version 0.4 Migration
+
+Version 0.4 removes `entrypointOutputMode`. Replace it with explicit `exportConditions`:
+
+```json
+{
+  "entrysmith": {
+    "entrypoints": ["index.ts"],
+    "exportConditions": ["default"]
   }
 }
 ```
@@ -99,7 +112,7 @@ When root Entrysmith workspace configuration is absent, Entrysmith uses package-
 
 ## Package Exports
 
-For `entrypointOutputMode: "esm"`, Entrysmith writes exports like:
+For `exportConditions: ["types", "import"]`, Entrysmith writes exports like:
 
 ```json
 {
@@ -117,7 +130,7 @@ For `entrypointOutputMode: "esm"`, Entrysmith writes exports like:
 }
 ```
 
-For `entrypointOutputMode: "cjs"`, Entrysmith uses `require` instead of `import`. When both modes are configured, each export includes `types`, `import`, and `require` conditions.
+Entrysmith emits only configured conditions. It emits `types` first and `default` last. Use `exportConditions: ["default"]` for a legacy default export without an explicit types condition.
 
 ## TypeScript Workspace Support
 

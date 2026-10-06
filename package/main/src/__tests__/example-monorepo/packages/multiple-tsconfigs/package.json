@@ -8,7 +8,10 @@
     "entrypoints": [
       "index.ts"
     ],
-    "entrypointOutputMode": "esm",
+    "exportConditions": [
+      "types",
+      "import"
+    ],
     "typescript": {
       "tsConfigReferenceTargetPath": "tsconfig.build.json",
       "referenceTsConfigPaths": [

@@ -6,34 +6,43 @@ describe("createExportForEntrypoint", () => {
 		{
 			entrypoint: new Entrypoint("index", undefined),
 			destinationDirectory: "dist",
-			outputModeList: ["cjs"] as const,
-			expected: [".", { types: "./dist/index.d.ts", require: "./dist/index.js" }],
+			exportConditions: ["types", "default"] as const,
+			expected: [".", { types: "./dist/index.d.ts", default: "./dist/index.js" }],
 		},
 		{
 			entrypoint: new Entrypoint("index", "main"),
 			destinationDirectory: "dist",
-			outputModeList: ["esm"] as const,
+			exportConditions: ["types", "import"] as const,
 			expected: ["./main", { types: "./dist/main/index.d.ts", import: "./dist/main/index.js" }],
-		},
-		{
-			entrypoint: new Entrypoint("another", "main"),
-			destinationDirectory: "build/esm",
-			outputModeList: ["esm"] as const,
-			expected: ["./main/another", { types: "./build/esm/main/another.d.ts", import: "./build/esm/main/another.js" }],
-		},
-		{
-			entrypoint: new Entrypoint("feature", undefined),
-			destinationDirectory: ".\\dist\\esm",
-			outputModeList: ["cjs"] as const,
-			expected: ["./feature", { types: "./dist/esm/feature.d.ts", require: "./dist/esm/feature.js" }],
 		},
 		{
 			entrypoint: new Entrypoint("index", undefined),
 			destinationDirectory: "dist",
-			outputModeList: ["cjs", "esm"] as const,
-			expected: [".", { types: "./dist/index.d.ts", import: "./dist/index.js", require: "./dist/index.js" }],
+			exportConditions: ["default"] as const,
+			expected: [".", { default: "./dist/index.js" }],
 		},
-	])("creates exports entry for $expected[0]", ({ entrypoint, destinationDirectory, outputModeList, expected }) => {
-		expect(createExportForEntrypoint(entrypoint, destinationDirectory, [...outputModeList])).toEqual(expected);
+		{
+			entrypoint: new Entrypoint("another", "main"),
+			destinationDirectory: "build/esm",
+			exportConditions: ["import"] as const,
+			expected: ["./main/another", { import: "./build/esm/main/another.js" }],
+		},
+		{
+			entrypoint: new Entrypoint("feature", undefined),
+			destinationDirectory: ".\\dist\\esm",
+			exportConditions: ["require"] as const,
+			expected: ["./feature", { require: "./dist/esm/feature.js" }],
+		},
+		{
+			entrypoint: new Entrypoint("index", undefined),
+			destinationDirectory: "dist",
+			exportConditions: ["default", "require", "types", "import"] as const,
+			expected: [
+				".",
+				{ types: "./dist/index.d.ts", import: "./dist/index.js", require: "./dist/index.js", default: "./dist/index.js" },
+			],
+		},
+	])("creates exports entry for $expected[0]", ({ entrypoint, destinationDirectory, exportConditions, expected }) => {
+		expect(createExportForEntrypoint(entrypoint, destinationDirectory, [...exportConditions])).toEqual(expected);
 	});
 });

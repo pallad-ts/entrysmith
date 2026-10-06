@@ -18,7 +18,7 @@ export async function applyPackageJsonChanges(dependency: Dependency): Promise<s
 		const [key, value] = createExportForEntrypoint(
 			entrypoint,
 			dependency.config.packageOutputDirectory,
-			dependency.config.entrypointOutputMode
+			dependency.config.exportConditions
 		);
 		exportsField[key] = value;
 	}
