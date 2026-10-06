@@ -10,27 +10,70 @@ const PACKAGE_OUTPUT_DIRECTORY_DESCRIPTION = "Directory where built package file
 
 export const DependencyExportConditionSchema = z.enum(["types", "import", "require", "default"]);
 export type DependencyExportCondition = z.infer<typeof DependencyExportConditionSchema>;
-export const DependencyConfigSchema = z.object({
-	entrypoints: z.array(z.string().min(1, "Entrypoint path cannot be empty")),
-	exportConditions: DependencyExportConditionSchema.array()
-		.nonempty("At least one export condition is required")
-		.refine(conditionList => {
-			return conditionList.some(condition => condition !== "types");
-		}, "At least one runtime export condition is required")
-		.refine(conditionList => {
-			return new Set(conditionList).size === conditionList.length;
-		}, "Export conditions cannot repeat"),
-	typescript: z
-		.object({
-			tsConfigReferenceTargetPath: z.string().min(1).default("tsconfig.json").describe(TS_CONFIG_REFERENCE_TARGET_PATH_DESCRIPTION),
-			referenceTsConfigPaths: z.array(z.string().min(1)).default(["tsconfig.json"]).describe(REFERENCE_TS_CONFIG_PATHS_DESCRIPTION),
-		})
-		.prefault({}),
-	packageOutputDirectory: z.string().min(1).default("dist").describe(PACKAGE_OUTPUT_DIRECTORY_DESCRIPTION),
-});
+const DEPENDENCY_EXPORT_CONDITION_LIST_SCHEMA = DependencyExportConditionSchema.array().refine(conditionList => {
+	return new Set(conditionList).size === conditionList.length;
+}, "Export conditions cannot repeat");
+
+export const DependencyConfigSchema = z
+	.object({
+		entrypoints: z.array(z.string().min(1, "Entrypoint path cannot be empty")),
+		exportConditions: DEPENDENCY_EXPORT_CONDITION_LIST_SCHEMA.optional(),
+		typescript: z
+			.object({
+				tsConfigReferenceTargetPath: z
+					.string()
+					.min(1)
+					.default("tsconfig.json")
+					.describe(TS_CONFIG_REFERENCE_TARGET_PATH_DESCRIPTION),
+				referenceTsConfigPaths: z
+					.array(z.string().min(1))
+					.default(["tsconfig.json"])
+					.describe(REFERENCE_TS_CONFIG_PATHS_DESCRIPTION),
+			})
+			.prefault({}),
+		packageOutputDirectory: z.string().min(1).default("dist").describe(PACKAGE_OUTPUT_DIRECTORY_DESCRIPTION),
+	})
+	.superRefine((config, context) => {
+		if (config.entrypoints.length === 0) {
+			return;
+		}
+
+		if (config.exportConditions === undefined || config.exportConditions.length === 0) {
+			context.addIssue({
+				code: "custom",
+				message: "At least one export condition is required when entrypoints are configured",
+				path: ["exportConditions"],
+			});
+			return;
+		}
+
+		if (!config.exportConditions.some(condition => condition !== "types")) {
+			context.addIssue({
+				code: "custom",
+				message: "At least one runtime export condition is required",
+				path: ["exportConditions"],
+			});
+		}
+	})
+	.transform(config => {
+		return {
+			...config,
+			exportConditions: config.exportConditions ?? [],
+		};
+	});
 
 export type DependencyConfig = z.infer<typeof DependencyConfigSchema>;
 
 export async function loadDependencyConfig(packageDirectory: string): Promise<DependencyConfig> {
-	return DependencyConfigSchema.parse(await loadEntrysmithConfig(packageDirectory));
+	const loadedConfig = await loadEntrysmithConfig(packageDirectory);
+	return parseDependencyConfig(loadedConfig.config, loadedConfig.path);
+}
+
+function parseDependencyConfig(config: unknown, configPath: string): DependencyConfig {
+	try {
+		return DependencyConfigSchema.parse(config);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		throw new Error(`Invalid entrysmith configuration in ${configPath}: ${message}`);
+	}
 }

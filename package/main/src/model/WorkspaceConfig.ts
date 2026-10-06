@@ -10,9 +10,9 @@ export const WorkspaceConfigSchema = z.object({
 export type WorkspaceConfig = z.infer<typeof WorkspaceConfigSchema>;
 
 export async function loadWorkspaceConfig(directory: string): Promise<WorkspaceConfig | undefined> {
-	let config: unknown;
+	let loadedConfig;
 	try {
-		config = await loadEntrysmithConfig(directory);
+		loadedConfig = await loadEntrysmithConfig(directory);
 	} catch (error) {
 		if (error instanceof NotFoundError) {
 			return undefined;
@@ -21,11 +21,16 @@ export async function loadWorkspaceConfig(directory: string): Promise<WorkspaceC
 		throw error;
 	}
 
-	if (!hasWorkspaceConfig(config)) {
+	if (!hasWorkspaceConfig(loadedConfig.config)) {
 		return undefined;
 	}
 
-	return WorkspaceConfigSchema.parse(config);
+	try {
+		return WorkspaceConfigSchema.parse(loadedConfig.config);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		throw new Error(`Invalid entrysmith configuration in ${loadedConfig.path}: ${message}`);
+	}
 }
 
 function hasWorkspaceConfig(config: unknown): config is { workspaces: unknown } {

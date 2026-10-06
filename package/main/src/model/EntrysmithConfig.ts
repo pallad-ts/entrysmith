@@ -6,7 +6,12 @@ const CONFIG_NAME = "entrysmith";
 const SEARCH_PLACES = ["package.json", "entrysmith.config.js", "entrysmith.config.ts", "entrysmith.config.json"];
 const TYPESCRIPT_EXTENSION = ".ts";
 
-export async function loadEntrysmithConfig(directory: string): Promise<unknown> {
+export interface LoadedEntrysmithConfig {
+	config: unknown;
+	path: string;
+}
+
+export async function loadEntrysmithConfig(directory: string): Promise<LoadedEntrysmithConfig> {
 	const explorer = cosmiconfig(CONFIG_NAME, {
 		searchPlaces: SEARCH_PLACES,
 		stopDir: directory,
@@ -20,5 +25,8 @@ export async function loadEntrysmithConfig(directory: string): Promise<unknown> 
 		throw new NotFoundError(`Unable to find entrysmith configuration in ${directory}. Expected one of: ${SEARCH_PLACES.join(", ")}`);
 	}
 
-	return searchResult.config;
+	return {
+		config: searchResult.config,
+		path: searchResult.filepath,
+	};
 }

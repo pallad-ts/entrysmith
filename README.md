@@ -55,7 +55,7 @@ Entrysmith loads configuration from one of:
 Configuration fields:
 
 - `entrypoints`: list of entrypoint files under `src`
-- `exportConditions`: non-empty list of package export conditions. Use `"types"`, `"import"`, `"require"`, or `"default"`. At least one runtime condition (`"import"`, `"require"`, or `"default"`) is required.
+- `exportConditions`: package export conditions. Use `"types"`, `"import"`, `"require"`, or `"default"`. When entrypoints exist, provide a non-empty list with at least one runtime condition (`"import"`, `"require"`, or `"default"`).
 - `packageOutputDirectory`: build output directory used in package exports, defaults to `"dist"`
 - `typescript.tsConfigReferenceTargetPath`: target path used when other workspace packages reference this package, defaults to the package root
 - `typescript.referenceTsConfigPaths`: tsconfig files that receive references and path mappings, defaults to `["tsconfig.json"]`
