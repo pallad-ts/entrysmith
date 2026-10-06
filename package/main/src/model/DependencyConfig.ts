@@ -1,7 +1,6 @@
-import { NotFoundError } from "@pallad/common-errors";
-import { cosmiconfig } from "cosmiconfig";
-import { TypeScriptLoader } from "cosmiconfig-typescript-loader";
 import { z } from "zod";
+
+import { loadEntrysmithConfig } from "./EntrysmithConfig";
 
 const TS_CONFIG_REFERENCE_TARGET_PATH_DESCRIPTION =
 	"Path to tsconfig target used when other workspace packages create TypeScript project references to this package. Defaults to the package root.";
@@ -30,30 +29,6 @@ export const DependencyConfigSchema = z.object({
 
 export type DependencyConfig = z.infer<typeof DependencyConfigSchema>;
 
-const CONFIG_NAME = "entrysmith";
-const SEARCH_PLACES = ["package.json", "entrysmith.config.js", "entrysmith.config.ts", "entrysmith.config.json"];
-const TYPESCRIPT_EXTENSION = ".ts";
-
 export async function loadDependencyConfig(packageDirectory: string): Promise<DependencyConfig> {
-	const explorer = cosmiconfig(CONFIG_NAME, {
-		searchPlaces: SEARCH_PLACES,
-		stopDir: packageDirectory,
-		loaders: {
-			[TYPESCRIPT_EXTENSION]: TypeScriptLoader(),
-		},
-	});
-
-	const searchResult = await explorer.search(packageDirectory);
-	if (!searchResult || searchResult.isEmpty) {
-		throw new NotFoundError(
-			`Unable to find entrysmith configuration in ${packageDirectory}. Expected one of: ${SEARCH_PLACES.join(", ")}`
-		);
-	}
-
-	const parsedConfig = DependencyConfigSchema.safeParse(searchResult.config);
-	if (!parsedConfig.success) {
-		throw parsedConfig.error;
-	}
-
-	return parsedConfig.data;
+	return DependencyConfigSchema.parse(await loadEntrysmithConfig(packageDirectory));
 }

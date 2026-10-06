@@ -6,7 +6,7 @@ It lets a package expose imports such as `@scope/package/model` or `@scope/packa
 
 ## What It Does
 
-Running `entrysmith fix` in a configured workspace package:
+Running `entrysmith fix` in a configured package:
 
 - ensures the configured build output directory is listed in `package.json` `files`
 - rewrites `package.json` `exports` for every configured entrypoint
@@ -79,6 +79,24 @@ Example:
 }
 ```
 
+### Workspace Configuration
+
+Configure Entrysmith workspaces at the workspace root:
+
+```json
+{
+	"entrysmith": {
+		"workspaces": ["packages/*", "tools/*"]
+	}
+}
+```
+
+`workspaces` must be a non-empty list of glob patterns. Entrysmith resolves patterns from the workspace root. It deduplicates overlapping matches. It skips matched directories without Entrysmith package configuration.
+
+Run `entrysmith fix` at this root to update every configured package. Entrysmith loads and validates every configured package before it writes files. It applies packages in dependency-first order. Dependencies in `dependencies`, `devDependencies`, `peerDependencies`, and `optionalDependencies` set this order. Dependency cycles and duplicate package names fail the command.
+
+Workspace configuration does not use package-manager `workspaces`. Entrysmith does not run package scripts or compile TypeScript.
+
 ## Package Exports
 
 For `entrypointOutputMode: "esm"`, Entrysmith writes exports like:
@@ -103,7 +121,7 @@ For `entrypointOutputMode: "cjs"`, Entrysmith uses `require` instead of `import`
 
 ## TypeScript Workspace Support
 
-Entrysmith discovers packages in the current workspace.
+When invoked inside one configured package, Entrysmith discovers packages in the current package-manager workspace.
 
 When the current package depends on another workspace package that has Entrysmith configuration, `entrysmith fix` updates the configured tsconfig files with:
 
@@ -114,7 +132,13 @@ If multiple configured tsconfig files extend a common parent that is also config
 
 ## Usage
 
-Run from a workspace package directory that contains Entrysmith configuration:
+Run from a configured package directory:
+
+```sh
+entrysmith fix
+```
+
+Run from a workspace root with `entrysmith.workspaces` to update each configured package:
 
 ```sh
 entrysmith fix

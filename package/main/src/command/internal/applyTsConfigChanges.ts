@@ -7,11 +7,10 @@ import { TsConfigFile } from "../../model/TsConfigFile";
 import { findTsConfigCommonExtends } from "../../model/findTsConfigCommonExtends";
 import { normalizePath } from "../../util/normalizePath";
 
-export async function applyTsConfigChanges(dependency: Dependency, project: Project): Promise<void> {
+export async function applyTsConfigChanges(dependency: Dependency, project: Project): Promise<string[]> {
+	const changedFilePathList: string[] = [];
 	const workspaceDependencyList = findWorkspaceDependenciesForPackage(dependency, project);
-	const commonTsConfigPathSet = new Set(
-		findTsConfigCommonExtends(dependency.tsConfigFiles).map(tsConfigFile => tsConfigFile.path)
-	);
+	const commonTsConfigPathSet = new Set(findTsConfigCommonExtends(dependency.tsConfigFiles).map(tsConfigFile => tsConfigFile.path));
 
 	for (const tsConfigFile of dependency.tsConfigFiles) {
 		applyReferencesToTsConfig(tsConfigFile, workspaceDependencyList, tsConfigFile.path, project.path);
@@ -21,9 +20,13 @@ export async function applyTsConfigChanges(dependency: Dependency, project: Proj
 		}
 
 		if (tsConfigFile.content !== undefined) {
-			await tsConfigFile.save();
+			if (await tsConfigFile.save()) {
+				changedFilePathList.push(tsConfigFile.path);
+			}
 		}
 	}
+
+	return changedFilePathList;
 }
 
 function compareEntrypointsByName(left: Entrypoint, right: Entrypoint): number {
@@ -66,9 +69,7 @@ function applyReferencesToTsConfig(
 	}
 
 	for (const workspaceDependency of workspaceDependencyList) {
-		const referenceTargetPath = omitTsConfigJsonFilename(
-			workspaceDependency.config.typescript.tsConfigReferenceTargetPath ?? "."
-		);
+		const referenceTargetPath = omitTsConfigJsonFilename(workspaceDependency.config.typescript.tsConfigReferenceTargetPath ?? ".");
 		const absoluteReferenceTargetPath = path.resolve(projectPath, workspaceDependency.path, referenceTargetPath);
 		const relativeReferenceTargetPath = normalizePath(path.relative(path.dirname(absTsConfigPath), absoluteReferenceTargetPath));
 

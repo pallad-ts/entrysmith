@@ -2,7 +2,7 @@
 
 import { Command } from "commander";
 
-import { apply } from "./command/apply";
+import { apply, formatApplySummary } from "./command/apply";
 
 const program = new Command();
 
@@ -14,7 +14,7 @@ program
 	.command("fix", { isDefault: true })
 	.description("Fix current package configuration")
 	.action(async () => {
-		await apply(process.cwd());
+		process.stdout.write(`${formatApplySummary(await apply(process.cwd()))}\n`);
 	});
 
 void program.parseAsync(process.argv).catch(error => {

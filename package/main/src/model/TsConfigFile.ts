@@ -3,14 +3,19 @@ import { writeTSConfig, TSConfig } from "pkg-types";
 
 import { readFile, rm } from "node:fs/promises";
 import * as path from "node:path";
+import { isDeepStrictEqual } from "node:util";
 
 export type TsConfigFileCompilerOptionsPaths = Record<string, string[]>;
 export type TsConfigFileReferences = Array<{ path: string }>;
 export class TsConfigFile {
+	private readonly originalContent: TSConfig | undefined;
+
 	constructor(
 		readonly path: string,
 		public content: TSConfig | undefined
-	) {}
+	) {
+		this.originalContent = structuredClone(content);
+	}
 
 	get compilerOptionsPaths(): TsConfigFileCompilerOptionsPaths | undefined {
 		return this.content?.compilerOptions?.paths;
@@ -70,12 +75,17 @@ export class TsConfigFile {
 		return tsConfigFile.extendsPath === this.path;
 	}
 
-	async save() {
+	async save(): Promise<boolean> {
+		if (isDeepStrictEqual(this.content, this.originalContent)) {
+			return false;
+		}
+
 		if (this.content === undefined || Object.keys(this.content).length === 0) {
 			await rm(this.path);
-			return;
+			return true;
 		}
 		await writeTSConfig(this.path, this.content);
+		return true;
 	}
 
 	static async load(path: string): Promise<TsConfigFile> {

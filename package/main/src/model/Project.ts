@@ -1,9 +1,13 @@
 import { getPackages } from "@manypkg/get-packages";
 import { NotFoundError } from "@pallad/common-errors";
+import { glob } from "tinyglobby";
 
 import * as path from "node:path";
 
 import { Dependency } from "./Dependency";
+import { loadDependencyConfig } from "./DependencyConfig";
+import { WorkspaceConfig } from "./WorkspaceConfig";
+import { orderWorkspaceDependencies } from "./orderWorkspaceDependencies";
 
 export class Project {
 	constructor(
@@ -12,10 +16,30 @@ export class Project {
 	) {}
 
 	static async load(projectPath: string): Promise<Project> {
-		const packageCollection = await getPackages(projectPath);
+		return Project.loadFromPackage(projectPath);
+	}
+
+	static async loadFromPackage(packagePath: string): Promise<Project> {
+		const packageCollection = await getPackages(packagePath);
 		const dependencyList = await loadDependencies(packageCollection.rootDir, packageCollection.packages);
 
 		return new Project(packageCollection.rootDir, dependencyList);
+	}
+
+	static async loadFromWorkspaceConfig(rootPath: string, workspaceConfig: WorkspaceConfig): Promise<Project> {
+		const absoluteRootPath = path.resolve(rootPath);
+		const packagePathList = await findWorkspacePackagePaths(absoluteRootPath, workspaceConfig);
+		const dependencyList = await Promise.all(
+			packagePathList.map(packagePath => {
+				return loadConfiguredDependency(absoluteRootPath, packagePath);
+			})
+		);
+		const configuredDependencyList = dependencyList.filter((dependency): dependency is Dependency => dependency !== undefined);
+		if (configuredDependencyList.length === 0) {
+			throw new Error(`Unable to find configured workspace packages in ${absoluteRootPath}`);
+		}
+
+		return new Project(absoluteRootPath, orderWorkspaceDependencies(configuredDependencyList));
 	}
 }
 
@@ -40,4 +64,30 @@ async function loadDependencies(
 	}
 
 	return dependencyList;
+}
+
+async function findWorkspacePackagePaths(rootPath: string, workspaceConfig: WorkspaceConfig): Promise<string[]> {
+	const pathList = await glob(workspaceConfig.workspaces, {
+		absolute: true,
+		cwd: rootPath,
+		onlyDirectories: true,
+		onlyFiles: false,
+	});
+
+	return [...new Set(pathList.map(packagePath => path.resolve(packagePath)))].sort();
+}
+
+async function loadConfiguredDependency(rootPath: string, packagePath: string): Promise<Dependency | undefined> {
+	let config;
+	try {
+		config = await loadDependencyConfig(packagePath);
+	} catch (error) {
+		if (error instanceof NotFoundError) {
+			return undefined;
+		}
+
+		throw error;
+	}
+
+	return Dependency.load(rootPath, path.relative(rootPath, packagePath), config);
 }

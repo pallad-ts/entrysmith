@@ -35,11 +35,11 @@ export class Dependency {
 		}
 	}
 
-	static async load(projectPath: string, dependencyPath: string): Promise<Dependency> {
+	static async load(projectPath: string, dependencyPath: string, loadedConfig?: DependencyConfig): Promise<Dependency> {
 		const dependencyAbsolutePath = path.resolve(projectPath, dependencyPath);
 		const [packageJson, config] = await Promise.all([
 			loadDependencyPackageJson(dependencyAbsolutePath),
-			loadDependencyConfig(dependencyAbsolutePath),
+			loadedConfig ?? loadDependencyConfig(dependencyAbsolutePath),
 		]);
 		if (typeof packageJson.name !== "string" || packageJson.name.length === 0) {
 			throw new Error("Package name cannot be empty");

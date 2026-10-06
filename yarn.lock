@@ -471,6 +471,7 @@ __metadata:
     cosmiconfig-typescript-loader: "npm:^6.1.0"
     jsonc-parser: "npm:^3.3.1"
     pkg-types: "npm:^2.3.0"
+    tinyglobby: "npm:^0.2.17"
     typescript: "npm:^5.8.3"
     zod: "npm:^4"
   bin:

@@ -6,7 +6,7 @@ import { createExportForEntrypoint } from "./createExportForEntrypoint";
 
 type PackageJsonExportsMap = Record<string, PackageJsonExports | undefined>;
 
-export async function applyPackageJsonChanges(dependency: Dependency): Promise<void> {
+export async function applyPackageJsonChanges(dependency: Dependency): Promise<string | undefined> {
 	const files = dependency.packageJson.content.files ?? [];
 	if (!files.includes(dependency.config.packageOutputDirectory)) {
 		files.push(dependency.config.packageOutputDirectory);
@@ -26,7 +26,7 @@ export async function applyPackageJsonChanges(dependency: Dependency): Promise<v
 	exportsField["./package.json"] = "./package.json";
 	dependency.packageJson.exports = exportsField as PackageJsonExports;
 
-	await dependency.packageJson.save();
+	return (await dependency.packageJson.save()) ? dependency.packageJson.path : undefined;
 }
 
 function compareEntrypointsByName(left: Entrypoint, right: Entrypoint): number {

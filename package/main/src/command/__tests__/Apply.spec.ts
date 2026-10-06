@@ -1,14 +1,13 @@
+import { PackageJson, TSConfig } from "pkg-types";
+import { afterEach, beforeEach } from "vitest";
+
 import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 
-import { afterEach, beforeEach } from "vitest";
-
-import { PackageJson, TSConfig } from "pkg-types";
-
 import { PackageJsonFile } from "../../model/PackageJsonFile";
 import { TsConfigFile } from "../../model/TsConfigFile";
-import { apply } from "../apply";
+import { apply, formatApplySummary } from "../apply";
 
 const tempDirectoryList: string[] = [];
 let fixturePath: string;
@@ -135,6 +134,52 @@ describe("apply", () => {
 		`);
 	});
 
+	it("applies every configured package from workspace root", async () => {
+		const rootPackageJsonPath = path.resolve(fixturePath, "package.json");
+		const rootPackageJson = (await PackageJsonFile.load(rootPackageJsonPath)).content;
+		const rootPackageJsonWithoutWorkspaceField = Object.fromEntries(
+			Object.entries(rootPackageJson).filter(([field]) => field !== "workspaces")
+		);
+		const libPackageJsonPath = path.resolve(fixturePath, "packages/lib/package.json");
+		const libPackageJson = (await PackageJsonFile.load(libPackageJsonPath)).content;
+		await writeFile(
+			rootPackageJsonPath,
+			`${JSON.stringify(
+				{
+					...rootPackageJsonWithoutWorkspaceField,
+					entrysmith: {
+						workspaces: ["packages/*"],
+					},
+				},
+				null,
+				2
+			)}\n`,
+			"utf8"
+		);
+		await writeFile(
+			libPackageJsonPath,
+			`${JSON.stringify(
+				{
+					...libPackageJson,
+					dependencies: undefined,
+				},
+				null,
+				2
+			)}\n`,
+			"utf8"
+		);
+
+		await apply(fixturePath);
+
+		const libPackageJsonFields = await readPackageJsonRelevant(path.resolve(fixturePath, "packages/lib/package.json"));
+		const appPackageJsonFields = await readPackageJsonRelevant(path.resolve(fixturePath, "packages/app/package.json"));
+		expect((libPackageJsonFields.exports as Record<string, unknown>)["./model"]).toMatchObject({ import: "./build/model/index.js" });
+		expect((appPackageJsonFields.exports as Record<string, unknown>)["."]).toMatchObject({ import: "./dist/index.js" });
+		expect(await readTsConfigRelevant(path.resolve(fixturePath, "packages/app/tsconfig.json"))).toMatchObject({
+			references: [{ path: "../lib" }],
+		});
+	});
+
 	it("applies commonjs root export after copying full workspace directory", async () => {
 		const packagePath = path.resolve(fixturePath, "packages/app");
 		const packageJsonPath = path.resolve(packagePath, "package.json");
@@ -169,6 +214,31 @@ describe("apply", () => {
 			  },
 			}
 		`);
+	});
+
+	it("reports changed files and reports no changes on a repeated apply", async () => {
+		const packagePath = path.resolve(fixturePath, "packages/app");
+
+		const firstResult = await apply(packagePath);
+		expect({
+			changedFilePathList: firstResult.changedFilePathList.map(filePath => path.relative(packagePath, filePath)),
+			packageCount: firstResult.packageCount,
+		}).toEqual({
+			changedFilePathList: ["package.json", "tsconfig.build.json", "tsconfig.json"],
+			packageCount: 1,
+		});
+
+		expect(await apply(packagePath)).toEqual({
+			changedFilePathList: [],
+			packageCount: 1,
+		});
+	});
+
+	it("formats apply summaries for changed and unchanged projects", () => {
+		expect(formatApplySummary({ changedFilePathList: ["package.json"], packageCount: 1 })).toBe(
+			"Entrysmith updated 1 file across 1 package."
+		);
+		expect(formatApplySummary({ changedFilePathList: [], packageCount: 3 })).toBe("Entrysmith is up to date.");
 	});
 
 	it("applies exports for all configured output modes", async () => {

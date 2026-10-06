@@ -1,12 +1,18 @@
 import { PackageJson, readPackageJSON, writePackageJSON } from "pkg-types";
 
+import { isDeepStrictEqual } from "node:util";
+
 import { normalizePath } from "../util/normalizePath";
 
 export class PackageJsonFile {
+	private readonly originalContent: PackageJson;
+
 	constructor(
 		readonly path: string,
 		public content: PackageJson
-	) {}
+	) {
+		this.originalContent = structuredClone(content);
+	}
 
 	get name() {
 		return this.content.name;
@@ -40,8 +46,13 @@ export class PackageJsonFile {
 		return this.content.exports;
 	}
 
-	async save() {
+	async save(): Promise<boolean> {
+		if (isDeepStrictEqual(this.content, this.originalContent)) {
+			return false;
+		}
+
 		await writePackageJSON(this.path, this.content);
+		return true;
 	}
 
 	static async load(path: string): Promise<PackageJsonFile> {
