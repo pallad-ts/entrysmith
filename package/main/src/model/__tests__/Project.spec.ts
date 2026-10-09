@@ -43,6 +43,10 @@ describe("Project", () => {
 			  "dependencyList": [
 			    {
 			      "config": {
+			        "barrelFileExtensions": [
+			          "ts",
+			          "js",
+			        ],
 			        "entrypoints": [
 			          "index.ts",
 			        ],
@@ -118,6 +122,10 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
+			        "barrelFileExtensions": [
+			          "ts",
+			          "js",
+			        ],
 			        "entrypoints": [
 			          "model/index.ts",
 			          "test/another.ts",
@@ -186,6 +194,10 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
+			        "barrelFileExtensions": [
+			          "ts",
+			          "js",
+			        ],
 			        "entrypoints": [
 			          "index.ts",
 			        ],
@@ -262,6 +274,10 @@ describe("Project", () => {
 			    },
 			    {
 			      "config": {
+			        "barrelFileExtensions": [
+			          "ts",
+			          "js",
+			        ],
 			        "entrypoints": [
 			          "index.ts",
 			        ],

@@ -3,6 +3,7 @@ import * as path from "node:path";
 import { Dependency } from "../model/Dependency";
 import { Project } from "../model/Project";
 import { loadWorkspaceConfig } from "../model/WorkspaceConfig";
+import { applyBarrelFileChanges } from "./internal/applyBarrelFileChanges";
 import { applyPackageJsonChanges } from "./internal/applyPackageJsonChanges";
 import { applyTsConfigChanges } from "./internal/applyTsConfigChanges";
 import { loadProjectAndDependency } from "./internal/loadProjectAndDependency";
@@ -45,6 +46,9 @@ async function applyDependencies(dependencyList: Dependency[], project: Project)
 		const changedPackageJsonPath = await applyPackageJsonChanges(dependency);
 		if (changedPackageJsonPath) {
 			changedFilePathSet.add(changedPackageJsonPath);
+		}
+		for (const changedBarrelFilePath of await applyBarrelFileChanges(dependency)) {
+			changedFilePathSet.add(changedBarrelFilePath);
 		}
 		for (const changedTsConfigPath of await applyTsConfigChanges(dependency, project)) {
 			changedFilePathSet.add(changedTsConfigPath);

@@ -24,6 +24,12 @@ describe("DependencyConfigSchema", () => {
 		});
 	});
 
+	it("uses TypeScript and JavaScript barrel file extensions by default", () => {
+		expect(DependencyConfigSchema.parse({ entrypoints: [] })).toMatchObject({
+			barrelFileExtensions: ["ts", "js"],
+		});
+	});
+
 	it.each([
 		{ entrypoints: ["index.ts"], exportConditions: [] },
 		{ entrypoints: ["index.ts"], exportConditions: ["types"] },

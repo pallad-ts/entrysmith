@@ -7,6 +7,8 @@ const TS_CONFIG_REFERENCE_TARGET_PATH_DESCRIPTION =
 const REFERENCE_TS_CONFIG_PATHS_DESCRIPTION =
 	"Paths to tsconfig files in this package that receive TypeScript project references. Path mappings are stored in the common extended tsconfig when possible.";
 const PACKAGE_OUTPUT_DIRECTORY_DESCRIPTION = "Directory where built package files are emitted and referenced from package.json exports.";
+const BARREL_FILE_EXTENSIONS_DESCRIPTION =
+	"File extensions included when Entrysmith generates configured index.ts barrel files. An empty list disables barrel generation.";
 
 export const DependencyExportConditionSchema = z.enum(["types", "import", "require", "default"]);
 export type DependencyExportCondition = z.infer<typeof DependencyExportConditionSchema>;
@@ -32,6 +34,7 @@ export const DependencyConfigSchema = z
 			})
 			.prefault({}),
 		packageOutputDirectory: z.string().min(1).default("dist").describe(PACKAGE_OUTPUT_DIRECTORY_DESCRIPTION),
+		barrelFileExtensions: z.array(z.string().min(1)).default(["ts", "js"]).describe(BARREL_FILE_EXTENSIONS_DESCRIPTION),
 	})
 	.superRefine((config, context) => {
 		if (config.entrypoints.length === 0) {
